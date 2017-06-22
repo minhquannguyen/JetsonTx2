@@ -1,0 +1,8 @@
+typedef int Status;
+
+typedef enum 
+{
+	SUCCESS,
+	INSUFFICIENT_RESOURCES,
+	GENERIC_ERROR
+} STATUS_VALUES;
