@@ -1,6 +1,5 @@
-#define MAXBUF     1024
-#define CHUNK      255
-#define MAXTX2CPUS 14
+#ifndef _JETSON_STATUS_H
+#define _JETSON_STATUS_H
 
 typedef int Status;
 
@@ -10,3 +9,5 @@ typedef enum
 	INSUFFICIENT_RESOURCES,
 	GENERIC_ERROR
 } STATUS_VALUES;
+
+#endif

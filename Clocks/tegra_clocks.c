@@ -4,7 +4,7 @@
 #include <string.h>
 #include <argp.h>
 #include <ctype.h>
-#include "common.h"
+#include "tegra_clocks.h"
 
 void parse_args(char **cmd_line, int *status)
 {
@@ -69,7 +69,8 @@ Status query_cpu_stats()
 			while (onlineCpus[onlineCpuIndex] <= atoi(tempBuf))
 			{
 				onlineCpuIndex++;
-				onlineCpus[onlineCpuIndex] = onlineCpus[onlineCpuIndex-1] + 1;
+				onlineCpus[onlineCpuIndex] =
+					onlineCpus[onlineCpuIndex-1] + 1;
 			}
 			bufIndex = 0;
 			memset(tempBuf, 0, sizeof(tempBuf));
