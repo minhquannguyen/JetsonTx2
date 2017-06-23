@@ -3,15 +3,15 @@
 
 #include "../Common/inc/jetsonStatus.h"
 
-#define MAXBUF     1024
-#define CHUNK      255
-#define MAXTX2CPUS 11
+#define MAXBUF     64
+#define SYSTEM_CPU_DIR "/sys/devices/system/cpu"
 
-Status queryCpuStats();
-Status queryGpuStats();
+Status getNumCpus(int *totalCpus);
 Status setCpuClock();
-Status getCpuClocks();
+Status getCpuClocks(int gpuID, char buf[]);
 Status setGpuClock();
 Status getGpuClocks();
+Status queryCpuStats();
+Status queryGpuStats();
 
 #endif
