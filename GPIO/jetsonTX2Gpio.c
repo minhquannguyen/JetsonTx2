@@ -12,7 +12,7 @@ Status gpioExport(tx2GPIO gpio)
 	fd = open(GPIO_DIR "/export", O_WRONLY);
 	if (fd < 0)
 	{
-		printf("%s: Error opening file\n", __FUNCTION__);
+		printf("%s: Error opening gpio/export\n", __FUNCTION__);
 		status = GENERIC_ERROR;
 		goto cleanup;
 	}
@@ -20,7 +20,7 @@ Status gpioExport(tx2GPIO gpio)
 	length = snprintf(gpioBuffer, sizeof(gpioBuffer), "%d", gpio);
 	if (write(fd, gpioBuffer, length) != length)
 	{
-		printf("%s: Error opening file\n", __FUNCTION__);
+		printf("%s: Error writing to gpio/export\n", __FUNCTION__);
 		status = GENERIC_ERROR;
 		goto cleanup;
 	}
@@ -39,7 +39,7 @@ Status gpioUnexport(tx2GPIO gpio)
 	fd = open(GPIO_DIR "/unexport", O_WRONLY);
 	if (fd < 0)
 	{
-		printf("%s: Error opening file\n", __FUNCTION__);
+		printf("%s: Error opening gpio/unexport\n", __FUNCTION__);
 		status = GENERIC_ERROR;
 		goto cleanup;
 	}
@@ -47,7 +47,7 @@ Status gpioUnexport(tx2GPIO gpio)
 	length = snprintf(gpioBuffer, sizeof(gpioBuffer), "%d", gpio);
 	if (write(fd, gpioBuffer, length) != length)
 	{
-		printf("%s: Error opening file\n", __FUNCTION__);
+		printf("%s: Error writing to gpio/unexport\n", __FUNCTION__);
 		status = GENERIC_ERROR;
 		goto cleanup;
 	}
@@ -76,7 +76,7 @@ Status gpioSetDirection(tx2GPIO gpio, pinDirection direction)
 	fd = open(dirBuffer, O_WRONLY);
 	if (fd < 0)
 	{
-		printf("%s: Error opening file\n", __FUNCTION__);
+		printf("%s: Error opening gpio%d/direction\n", __FUNCTION__, gpio);
 		status = GENERIC_ERROR;
 		goto cleanup;
 	}
@@ -86,7 +86,8 @@ Status gpioSetDirection(tx2GPIO gpio, pinDirection direction)
 		case input:
 			if (write(fd, "in", 3) != 3)
 			{
-				printf("%s: Error opening file\n", __FUNCTION__);
+				printf("%s: Error writing to gpio%d/direction\n",
+						__FUNCTION__, gpio);
 				status = GENERIC_ERROR;
 				goto cleanup;
 			}
@@ -94,7 +95,8 @@ Status gpioSetDirection(tx2GPIO gpio, pinDirection direction)
 		case output:
 			if (write(fd, "out", 4) != 4)
 			{
-				printf("%s: Error opening file\n", __FUNCTION__);
+				printf("%s: Error writing to gpio%d/direction\n", 
+						__FUNCTION__, gpio);
 				status = GENERIC_ERROR;
 				goto cleanup;
 			}
