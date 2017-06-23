@@ -6,10 +6,6 @@
 #include <ctype.h>
 #include "common.h"
 
-#define CHUNK   255
-#define MAXCPUS 6
-#define MAXBUF  1024
-
 void parse_args(char **cmd_line, int *status)
 {
 	while (*cmd_line)
@@ -21,12 +17,12 @@ void parse_args(char **cmd_line, int *status)
 Status query_cpu_stats()
 {
 	char   buf[CHUNK];
-	int    onlineCpus[MAXCPUS];
+	int    onlineCpus[MAXTX2CPUS];
 	FILE   *fp_online, *fp_offline;
 	int    bufferIndex = 0, onlineCpuIndex = 0;
 	
-	memset(buf, 0, CHUNK);
-	memset(onlineCpus, 0, MAXCPUS);
+	memset(buf, 0, sizeof(buf));
+	memset(onlineCpus, 0, sizeof(onlineCpus));
 
 	fp_online = fopen("/sys/devices/system/cpu/online", "r");
 	
@@ -43,37 +39,62 @@ Status query_cpu_stats()
 		fclose(fp_online);
 		return GENERIC_ERROR;
 	}
-	
+
+	int bufIndex = 0;
+	char tempBuf[CHUNK];
+	memset(tempBuf, 0, sizeof(tempBuf));
+
 	// Really hacky, should find a better way
-	while (buf[bufferIndex])
+	while (1)
 	{
-		char cpuNum = buf[bufferIndex];
-		if (isdigit(cpuNum))
+		char ch = buf[bufferIndex];
+		if (ch == '\0')
 		{
-			onlineCpus[onlineCpuIndex] = cpuNum - '0';
+			onlineCpus[onlineCpuIndex] = atoi(tempBuf);
+			break;
 		}
-		else if (cpuNum == '-')
+		else if (ch == '-')
 		{
-			while (onlineCpus[onlineCpuIndex-1] < (buf[bufferIndex+1] - '0'))
-			{
-				onlineCpus[onlineCpuIndex] = onlineCpus[onlineCpuIndex-1] + 1;
-				onlineCpuIndex++;
-			}
-			onlineCpuIndex--;
+			onlineCpus[onlineCpuIndex] = atoi(tempBuf);
+			bufIndex = 0;
 			bufferIndex++;
+			memset(tempBuf, 0, sizeof(tempBuf));
+
+			for (ch = buf[bufferIndex]; ch != ',' && ch != '\0'; ch = buf[++bufferIndex])
+			{
+				tempBuf[bufIndex] = ch;
+				bufIndex++;
+			}
+
+			while (onlineCpus[onlineCpuIndex] <= atoi(tempBuf))
+			{
+				onlineCpuIndex++;
+				onlineCpus[onlineCpuIndex] = onlineCpus[onlineCpuIndex-1] + 1;
+			}
+			bufIndex = 0;
+			memset(tempBuf, 0, sizeof(tempBuf));
+		}
+		else if (ch == ',')
+		{
+			onlineCpus[onlineCpuIndex] = atoi(tempBuf);
+			onlineCpuIndex++;
+			memset(tempBuf, 0, sizeof(tempBuf));
+			bufIndex = 0;
+			bufferIndex++;
+			continue;
 		}
 		else
 		{
-			onlineCpuIndex--;
+			tempBuf[bufIndex] = ch;
+			bufIndex++;
 		}
-		onlineCpuIndex++;
 		bufferIndex++;
 	}
-	
+
 	printf("Online CPUs: %s", buf);
-	memset(buf, 0, CHUNK);
+	memset(buf, 0, sizeof(buf));
 	fclose(fp_online);
-	
+
 	// Output the clock values of the Cpus
 	for (int i = 0; i < onlineCpuIndex; i++)
 	{
@@ -86,21 +107,22 @@ Status query_cpu_stats()
 		{
 			return INSUFFICIENT_RESOURCES;
 		}
-		
+
 		cpuFile = fopen(cpuDirBuffer, "r");
-		
+
 		if (fgets(buf, CHUNK, cpuFile) == NULL)
 		{
 			printf("%s: Error reading file\n", __FUNCTION__);
 			fclose(cpuFile);
 			return GENERIC_ERROR;
 		}
+
 		printf("Cpu%d running at %s Khz\n", onlineCpus[i], strtok(buf, "\n"));
 		fclose(cpuFile);
 	}
 	
 	fp_offline = fopen("/sys/devices/system/cpu/offline", "r");
-	memset(buf, 0, CHUNK);
+	memset(buf, 0, sizeof(buf));
 
 	if (!fp_offline)
 	{
