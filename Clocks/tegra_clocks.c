@@ -94,7 +94,8 @@ Status query_cpu_stats()
 	status = getNumCpus(&numCpus);
 	if (status != SUCCESS)
 	{
-		printf("%s: Error getting number of CPUs\n", __FUNCTION__);
+		printf("%s: Error getting number of CPUs status = \n",
+				__FUNCTION__, status);
 		return status;
 	}
 
