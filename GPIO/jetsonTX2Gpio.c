@@ -336,7 +336,11 @@ int main()
 {
 	int fd;
 	int val;
-	gpioSetValue(gpio298, high);
+	gpioExport(gpio298);
+	gpioSetDirection(gpio298, output);
+	gpioSetValue(gpio298, low);
 	gpioGetValue(gpio298, &val);
+	printf("%d\n", val);
+	gpioUnexport(gpio298);
 	return 0;
 }
