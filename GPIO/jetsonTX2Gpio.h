@@ -6,37 +6,50 @@
 #define GPIO_DIR "/sys/class/gpio"
 #define BUF_SIZE 64
 
-typedef unsigned int tx2GPIO;
-typedef unsigned int pinDirection;
-typedef unsigned int pinValue;
+typedef enum {
+    gpio298 = 298,  // Pin 31 GPIO9_MOTION_INT
+    gpio388 = 388,  // pin 37 GPIO8_ALS_PROX_INT
+    gpio389 = 389,  // Pin 33 GPIO11_AP_WAKE_BT
+    gpio398 = 398,  // Pin 29 GPIO19_AUD_RST
+    gpio481 = 481   // Pin 18 GPIO16_MDM_WAKE_AP
+} TX2GPIO;
 
-enum tx2GPIO {
-	gpio298 = 298,	// Pin 31 GPIO9_MOTION_INT
-	gpio388 = 388,	// pin 37 GPIO8_ALS_PROX_INT
-	gpio389 = 389,	// Pin 33 GPIO11_AP_WAKE_BT
-	gpio398 = 398,	// Pin 29 GPIO19_AUD_RST
-	gpio481 = 481	//Pin 18 GPIO16_MDM_WAKE_AP
-};
+typedef enum {
+    GPIO_FILE_MODE_READ = 0,
+    GPIO_FILE_MODE_WRITE
+} GPIO_FILE_MODE;
 
-enum pinDirection {
-	input = 0,
-	output
-};
+typedef enum {
+    GPIO_DIRECTION_INPUT = 0,
+    GPIO_DIRECTION_OUTPUT
+} GPIO_PIN_DIRECTION;
 
-enum pinValue {
-	low = 0,
-	high
-};
+typedef enum {
+    GPIO_PIN_VALUE_LOW = 0,
+    GPIO_PIN_VALUE_HIGH
+} GPIO_PIN_VALUE;
 
-static Status gpio_open_file(tx2GPIO gpio, char *dirToOpen, int *fd);
-Status gpio_export(tx2GPIO gpio);
-Status gpio_unexport(tx2GPIO gpio);
-Status gpio_set_direction(tx2GPIO gpio, pinDirection direction);
-Status gpio_set_value(tx2GPIO gpio, pinValue value);
-Status gpio_get_value(tx2GPIO gpio, pinValue *value);
-Status gpio_set_edge(tx2GPIO gpio, char *edge);
-Status gpio_open(tx2GPIO gpio, int *fd);
+typedef enum {
+    GPIO_PIN_EDGE_NONE = 0,
+    GPIO_PIN_EDGE_RISING,
+    GPIO_PIN_EDGE_FALLING,
+    GPIO_PIN_EDGE_BOTH
+} GPIO_PIN_EDGE;
+
+typedef enum {
+    GPIO_ACTIVE_LOW_FALSE = 0,
+    GPIO_ACTIVE_LOW_TRUE
+} GPIO_ACTIVE_LOW;
+
+static Status _gpio_open_file(TX2GPIO gpio, GPIO_FILE_MODE mode, char *dirToOpen, int *fd);
+Status gpio_export(TX2GPIO gpio);
+Status gpio_unexport(TX2GPIO gpio);
+Status gpio_set_direction(TX2GPIO gpio, GPIO_PIN_DIRECTION direction);
+Status gpio_set_value(TX2GPIO gpio, GPIO_PIN_VALUE value);
+Status gpio_get_value(TX2GPIO gpio, GPIO_PIN_VALUE *value);
+Status gpio_set_edge(TX2GPIO gpio, GPIO_PIN_EDGE edge);
+Status gpio_active_low(TX2GPIO gpio, GPIO_ACTIVE_LOW activeLow);
+Status gpio_open(TX2GPIO gpio, int *fd);
 Status gpio_close(int fd);
-Status gpio_active_low();
 
 #endif

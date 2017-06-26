@@ -6,217 +6,232 @@
 #include <ctype.h>
 #include "tegra_clocks.h"
 
-void parse_args(char **cmd_line, int *status)
+void
+parse_args
+(
+    char **cmd_line,
+    int *status
+)
 {
-	while (*cmd_line)
-	{
-		cmd_line++;
-	}
+    while (*cmd_line)
+    {
+        cmd_line++;
+    }
 }
 
-Status get_num_cpus(int *totalCpus)
+Status
+get_num_cpus
+(
+    int *totalCpus
+)
 {
-	FILE 	*pFile;
-	char 	readBuf[MAXBUF];
-	Status 	status = SUCCESS;
-	int 	cpuCount = 0;
+    FILE    *pFile;
+    char    readBuf[MAXBUF];
+    Status  status = SUCCESS;
+    int     cpuCount = 0;
 
-	pFile = fopen("/proc/cpuinfo", "r");
-	if (!pFile)
-	{
-		printf("%s: Error opening file\n", __FUNCTION__);
-		status = FILE_HANDLING_ERROR;
-		goto end;
-	}
+    pFile = fopen("/proc/cpuinfo", "r");
+    if (!pFile)
+    {
+        printf("%s: Error opening file\n", __FUNCTION__);
+        status = FILE_HANDLING_ERROR;
+        goto end;
+    }
 
-	while (fscanf(pFile, "%s", readBuf) != EOF)
-	{
-		if(strstr(readBuf, "processor"))
-		{
-			cpuCount++;
-		}
-	}
+    while (fscanf(pFile, "%s", readBuf) != EOF)
+    {
+        if (strstr(readBuf, "processor"))
+        {
+            cpuCount++;
+        }
+    }
 
-	*totalCpus = cpuCount;
-	fclose(pFile);
+    *totalCpus = cpuCount;
+    fclose(pFile);
 
 end:
-	return status;
+    return status;
 }
 
-Status get_cpu_clocks(int gpuID, char buf[])
+Status
+get_cpu_clocks
+(
+    int gpuID,
+    char buf[]
+)
 {
-	FILE *cpuFile;
-	char cpuDirBuffer[MAXBUF];
-	Status status = SUCCESS;
+    FILE *cpuFile;
+    char cpuDirBuffer[MAXBUF];
+    Status status = SUCCESS;
 
-	if (snprintf(cpuDirBuffer, sizeof(cpuDirBuffer),
-		SYSTEM_CPU_DIR "/cpu%d/cpufreq/scaling_cur_freq",
-		gpuID) < 0)
-	{
-		status = INSUFFICIENT_RESOURCES;
-		goto cleanup;
-	}
+    if (snprintf(cpuDirBuffer, sizeof(cpuDirBuffer),
+        SYSTEM_CPU_DIR "/cpu%d/cpufreq/scaling_cur_freq",
+        gpuID) < 0)
+    {
+        status = INSUFFICIENT_RESOURCES;
+        goto cleanup;
+    }
 
-	cpuFile = fopen(cpuDirBuffer, "r");
-	if (!cpuFile)
-	{
-		printf("%s: Error opening file\n", __FUNCTION__);
-		status = FILE_HANDLING_ERROR;
-		goto end;
-	}
+    cpuFile = fopen(cpuDirBuffer, "r");
+    if (!cpuFile)
+    {
+        printf("%s: Error opening file\n", __FUNCTION__);
+        status = FILE_HANDLING_ERROR;
+        goto end;
+    }
 
-	// copy cpu clock value back into buf
-	if (fgets(buf, MAXBUF, cpuFile) == NULL)
-	{
-		printf("%s: Error reading file\n", __FUNCTION__);
-		status = FILE_HANDLING_ERROR;
-		goto cleanup;
-	}
+    // copy cpu clock value back into buf
+    if (fgets(buf, MAXBUF, cpuFile) == NULL)
+    {
+        printf("%s: Error reading file\n", __FUNCTION__);
+        status = FILE_HANDLING_ERROR;
+        goto cleanup;
+    }
 
 cleanup:
-	fclose(cpuFile);
+    fclose(cpuFile);
 end:
-	return status;
+    return status;
 }
 
-Status query_cpu_stats()
+Status
+query_cpu_stats()
 {
-	char   readBuf[MAXBUF];
-	char   tempBuf[MAXBUF];
-	FILE   *fp_online, *fp_offline;
-	int    *onlineCpus = NULL;
-	int    readBufIndex = 0, onlineCpuIndex = 0, tempBufIndex = 0, numCpus;
-	Status status = SUCCESS;
-	
-	memset(readBuf, 0, sizeof(readBuf));
+    char   readBuf[MAXBUF];
+    char   tempBuf[MAXBUF];
+    FILE   *fp_online, *fp_offline;
+    int    *onlineCpus = NULL;
+    int    readBufIndex = 0, onlineCpuIndex = 0, tempBufIndex = 0, numCpus;
+    Status status = SUCCESS;
 
-	status = get_num_cpus(&numCpus);
-	if (status != SUCCESS)
-	{
-		printf("%s: Error getting number of CPUs status = \n",
-				__FUNCTION__, status);
-		return status;
-	}
+    memset(readBuf, 0, sizeof(readBuf));
 
-	onlineCpus = malloc(sizeof(int) * numCpus);
-	if (!onlineCpus)
-	{
-		printf("%s: Error allocating memory\n", __FUNCTION__);
-		return INSUFFICIENT_RESOURCES;
-	}
+    status = get_num_cpus(&numCpus);
+    if (status != SUCCESS)
+    {
+        printf("%s: Error getting number of CPUs status = \n",
+                __FUNCTION__, status);
+        return status;
+    }
 
-	fp_online = fopen(SYSTEM_CPU_DIR "/online", "r");
-	if (!fp_online)
-	{
-		printf("%s: Error opening file\n", __FUNCTION__);
-		return FILE_HANDLING_ERROR;
-	}
-	
-	// Output the online Cpus
-	if (fgets(readBuf, sizeof(readBuf), fp_online) == NULL)
-	{
-		printf("%s: Error reading file\n", __FUNCTION__);
-		fclose(fp_online);
-		return FILE_HANDLING_ERROR;
-	}
+    onlineCpus = malloc(sizeof(int) * numCpus);
+    if (!onlineCpus)
+    {
+        printf("%s: Error allocating memory\n", __FUNCTION__);
+        return INSUFFICIENT_RESOURCES;
+    }
 
-	memset(tempBuf, 0, sizeof(tempBuf));
-	fclose(fp_online);
+    fp_online = fopen(SYSTEM_CPU_DIR "/online", "r");
+    if (!fp_online)
+    {
+        printf("%s: Error opening file\n", __FUNCTION__);
+        return FILE_HANDLING_ERROR;
+    }
 
-	// Really hacky, should find a better way
-	while (1)
-	{
-		char ch = readBuf[readBufIndex];
-		if (ch == '\0')
-		{
-			onlineCpus[onlineCpuIndex] = atoi(tempBuf);
-			break;
-		}
-		else if (ch == '-')
-		{
-			onlineCpus[onlineCpuIndex] = atoi(tempBuf);
-			tempBufIndex = 0;
-			readBufIndex++;
-			memset(tempBuf, 0, sizeof(tempBuf));
+    // Output the online Cpus
+    if (fgets(readBuf, sizeof(readBuf), fp_online) == NULL)
+    {
+        printf("%s: Error reading file\n", __FUNCTION__);
+        fclose(fp_online);
+        return FILE_HANDLING_ERROR;
+    }
 
-			// get the full numeric value into the buffer
-			for (ch = readBuf[readBufIndex]; ch != ',' && ch != '\0' && ch != '\n';
-					ch = readBuf[++readBufIndex])
-			{
-				tempBuf[tempBufIndex] = ch;
-				tempBufIndex++;
-			}
+    memset(tempBuf, 0, sizeof(tempBuf));
+    fclose(fp_online);
 
-			while (onlineCpus[onlineCpuIndex] <= atoi(tempBuf))
-			{
-				onlineCpuIndex++;
-				onlineCpus[onlineCpuIndex] =
-					onlineCpus[onlineCpuIndex-1] + 1;
-			}
+    // Really hacky, should find a better way
+    while (1)
+    {
+        char ch = readBuf[readBufIndex];
+        if (ch == '\0')
+        {
+            onlineCpus[onlineCpuIndex] = atoi(tempBuf);
+            break;
+        }
+        else if (ch == '-')
+        {
+            onlineCpus[onlineCpuIndex] = atoi(tempBuf);
+            tempBufIndex = 0;
+            readBufIndex++;
+            memset(tempBuf, 0, sizeof(tempBuf));
 
-			tempBufIndex = 0;
-			memset(tempBuf, 0, sizeof(tempBuf));
-		}
-		else if (ch == ',')
-		{
-			onlineCpus[onlineCpuIndex] = atoi(tempBuf);
-			onlineCpuIndex++;
-			memset(tempBuf, 0, sizeof(tempBuf));
-			tempBufIndex = 0;
-			readBufIndex++;
-			continue;
-		}
-		else
-		{
-			tempBuf[tempBufIndex] = ch;
-			tempBufIndex++;
-		}
-		readBufIndex++;
-	}
+            // get the full numeric value into the buffer
+            for (ch = readBuf[readBufIndex]; ch != ',' && ch != '\0' && ch != '\n';
+                    ch = readBuf[++readBufIndex])
+            {
+                tempBuf[tempBufIndex] = ch;
+                tempBufIndex++;
+            }
 
-	printf("Online CPUs: %s", readBuf);
-	memset(readBuf, 0, sizeof(readBuf));
+            while (onlineCpus[onlineCpuIndex] <= atoi(tempBuf))
+            {
+                onlineCpuIndex++;
+                onlineCpus[onlineCpuIndex] =
+                    onlineCpus[onlineCpuIndex-1] + 1;
+            }
 
-	// Output the clock values of the Cpus
-	for (int i = 0; i < onlineCpuIndex; i++)
-	{
-		get_cpu_clocks(onlineCpus[i], readBuf);
-		printf("Cpu%d running at %s Khz\n", onlineCpus[i], strtok(readBuf, "\n"));
-	}
-	
-	fp_offline = fopen(SYSTEM_CPU_DIR "/offline", "r");
-	memset(readBuf, 0, sizeof(readBuf));
+            tempBufIndex = 0;
+            memset(tempBuf, 0, sizeof(tempBuf));
+        }
+        else if (ch == ',')
+        {
+            onlineCpus[onlineCpuIndex] = atoi(tempBuf);
+            onlineCpuIndex++;
+            memset(tempBuf, 0, sizeof(tempBuf));
+            tempBufIndex = 0;
+            readBufIndex++;
+            continue;
+        }
+        else
+        {
+            tempBuf[tempBufIndex] = ch;
+            tempBufIndex++;
+        }
+        readBufIndex++;
+    }
 
-	if (!fp_offline)
-	{
-		printf("%s: Error opening file\n", __FUNCTION__);
-		return FILE_HANDLING_ERROR;
-	}
-	
-	// Output the offline Cpus
-	if (fgets(readBuf, sizeof(readBuf), fp_offline) == NULL)
-	{
-		printf("%s: Error reading file\n", __FUNCTION__);
-		fclose(fp_offline );
-		return FILE_HANDLING_ERROR;
-	}
+    printf("Online CPUs: %s", readBuf);
+    memset(readBuf, 0, sizeof(readBuf));
 
-	printf("\nOffline CPUs: %s", readBuf);
-	fclose(fp_offline);
-	free(onlineCpus);
-	
-	return SUCCESS;
+    // Output the clock values of the Cpus
+    for (int i = 0; i < onlineCpuIndex; i++)
+    {
+        get_cpu_clocks(onlineCpus[i], readBuf);
+        printf("Cpu%d running at %s Khz\n", onlineCpus[i], strtok(readBuf, "\n"));
+    }
+
+    fp_offline = fopen(SYSTEM_CPU_DIR "/offline", "r");
+    memset(readBuf, 0, sizeof(readBuf));
+
+    if (!fp_offline)
+    {
+        printf("%s: Error opening file\n", __FUNCTION__);
+        return FILE_HANDLING_ERROR;
+    }
+
+    // Output the offline Cpus
+    if (fgets(readBuf, sizeof(readBuf), fp_offline) == NULL)
+    {
+        printf("%s: Error reading file\n", __FUNCTION__);
+        fclose(fp_offline );
+        return FILE_HANDLING_ERROR;
+    }
+
+    printf("\nOffline CPUs: %s", readBuf);
+    fclose(fp_offline);
+    free(onlineCpus);
+
+    return SUCCESS;
 }
 
 int main(int argc, char **argv)
 {
-	Status status;
-	//if (argc > 1)
-	//{
-	//	parse_args(&argv[0], &status);
-	//}
-	status = query_cpu_stats();
-	
-	return 0;
+    Status status;
+    //if (argc > 1)
+    //{
+    //  parse_args(&argv[0], &status);
+    //}
+    status = query_cpu_stats();
+
+    return 0;
 }
