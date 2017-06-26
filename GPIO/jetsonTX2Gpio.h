@@ -28,15 +28,15 @@ enum pinValue {
 	high
 };
 
-static Status gpioOpenFile(tx2GPIO gpio, char *dirToOpen, int *fd);
-Status gpioExport(tx2GPIO gpio);
-Status gpioUnexport(tx2GPIO gpio);
-Status gpioSetDirection(tx2GPIO gpio, pinDirection direction);
-Status gpioSetValue(tx2GPIO gpio, pinValue value);
-Status gpioGetValue(tx2GPIO gpio, pinValue *value);
-Status gpioSetEdge(tx2GPIO gpio, char *edge);
-Status gpioOpen(tx2GPIO gpio, int *fd);
-Status gpioClose(int fd);
-Status gpioActiveLow();
+static Status gpio_open_file(tx2GPIO gpio, char *dirToOpen, int *fd);
+Status gpio_export(tx2GPIO gpio);
+Status gpio_unexport(tx2GPIO gpio);
+Status gpio_set_direction(tx2GPIO gpio, pinDirection direction);
+Status gpio_set_value(tx2GPIO gpio, pinValue value);
+Status gpio_get_value(tx2GPIO gpio, pinValue *value);
+Status gpio_set_edge(tx2GPIO gpio, char *edge);
+Status gpio_open(tx2GPIO gpio, int *fd);
+Status gpio_close(int fd);
+Status gpio_active_low();
 
 #endif

@@ -12,7 +12,7 @@
  *
  *	returns SUCCESS
  */
-Status gpioExport(tx2GPIO gpio)
+Status gpio_export(tx2GPIO gpio)
 {
 	int 	fd, length;
 	char 	gpioBuffer[BUF_SIZE];
@@ -46,7 +46,7 @@ cleanup:
  *
  *	returns SUCCESS
  */
-Status gpioUnexport(tx2GPIO gpio)
+Status gpio_unexport(tx2GPIO gpio)
 {
 	int 	fd, length;
 	char	gpioBuffer[BUF_SIZE];
@@ -81,12 +81,12 @@ cleanup:
  *
  *	returns SUCCESS
  */
-Status gpioSetDirection(tx2GPIO gpio, pinDirection direction)
+Status gpio_set_direction(tx2GPIO gpio, pinDirection direction)
 {
 	int		fd;
 	Status 	status = SUCCESS;
 	
-	status = gpioOpenFile(gpio, "/direction", &fd);
+	status = gpio_open_file(gpio, "/direction", &fd);
 	if (status != SUCCESS)
 	{
 		printf("%s: gpioOpenFile failed status = %d\n",
@@ -129,12 +129,12 @@ cleanup:
  *
  *	returns SUCCESS
  */
-Status gpioSetValue(tx2GPIO gpio, pinValue value)
+Status gpio_set_value(tx2GPIO gpio, pinValue value)
 {
 	int 	fd;
 	Status 	status = SUCCESS;
 
-	status = gpioOpenFile(gpio, "/value", &fd);
+	status = gpio_open_file(gpio, "/value", &fd);
 	if (status != SUCCESS)
 	{
 		printf("%s: gpioOpenFile failed status = %d\n",
@@ -177,7 +177,7 @@ cleanup:
  *
  *	returns SUCCESS
  */
-Status gpioGetValue(tx2GPIO gpio, pinValue *value)
+Status gpio_get_value(tx2GPIO gpio, pinValue *value)
 {
 	int 	fd;
 	char	val;
@@ -185,7 +185,7 @@ Status gpioGetValue(tx2GPIO gpio, pinValue *value)
 	*value = 0;
 
 	// status = gpioOpenFile(gpio, "/value", &fd);
-	status = gpioOpen(gpio, &fd);
+	status = gpio_open(gpio, &fd);
 	if (status != SUCCESS)
 	{
 		printf("%s: gpioOpenFile failed status = %d\n",
@@ -218,12 +218,12 @@ cleanup:
 }
 
 // TODO
-Status gpioSetEdge(tx2GPIO gpio, char *edge)
+Status gpio_set_edge(tx2GPIO gpio, char *edge)
 {
 	int 	fd;
 	Status 	status = SUCCESS;
 
-	status = gpioOpenFile(gpio, "/edge", &fd);
+	status = gpio_open_file(gpio, "/edge", &fd);
 	if (status != SUCCESS)
 	{
 		printf("%s: gpioOpenFile failed status = %d\n",
@@ -241,7 +241,7 @@ Status gpioSetEdge(tx2GPIO gpio, char *edge)
  *
  *	returns SUCCESS
  */
-Status gpioOpen(tx2GPIO gpio, int *fd)
+Status gpio_open(tx2GPIO gpio, int *fd)
 {
 	int		length;
 	char 	dirBuffer[BUF_SIZE];
@@ -273,7 +273,7 @@ Status gpioOpen(tx2GPIO gpio, int *fd)
 	return status;
 }
 
-Status gpioClose(int fd)
+Status gpio_close(int fd)
 {
 	Status status = close(fd);
 	if (status != SUCCESS)
@@ -295,7 +295,7 @@ Status gpioClose(int fd)
  *
  *	returns SUCCESS
  */
-static Status gpioOpenFile(tx2GPIO gpio, char *dirToOpen, int *fd)
+static Status gpio_open_file(tx2GPIO gpio, char *dirToOpen, int *fd)
 {
 	int		length;
 	char 	dirBuffer[BUF_SIZE];
@@ -330,17 +330,16 @@ static Status gpioOpenFile(tx2GPIO gpio, char *dirToOpen, int *fd)
 }
 
 // TODO
-Status gpioActiveLow();
+Status gpio_active_low();
 
 int main()
 {
-	int fd;
-	int val;
-	gpioExport(gpio298);
-	gpioSetDirection(gpio298, output);
-	gpioSetValue(gpio298, low);
-	gpioGetValue(gpio298, &val);
+	unsigned int val;
+	gpio_export(gpio298);
+	gpio_set_direction(gpio298, output);
+	gpio_set_value(gpio298, low);
+	gpio_get_value(gpio298, &val);
 	printf("%d\n", val);
-	gpioUnexport(gpio298);
+	gpio_unexport(gpio298);
 	return 0;
 }

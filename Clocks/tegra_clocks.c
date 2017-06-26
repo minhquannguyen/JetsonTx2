@@ -14,7 +14,7 @@ void parse_args(char **cmd_line, int *status)
 	}
 }
 
-Status getNumCpus(int *totalCpus)
+Status get_num_cpus(int *totalCpus)
 {
 	FILE 	*pFile;
 	char 	readBuf[MAXBUF];
@@ -44,7 +44,7 @@ end:
 	return status;
 }
 
-Status getCpuClocks(int gpuID, char buf[])
+Status get_cpu_clocks(int gpuID, char buf[])
 {
 	FILE *cpuFile;
 	char cpuDirBuffer[MAXBUF];
@@ -91,7 +91,7 @@ Status query_cpu_stats()
 	
 	memset(readBuf, 0, sizeof(readBuf));
 
-	status = getNumCpus(&numCpus);
+	status = get_num_cpus(&numCpus);
 	if (status != SUCCESS)
 	{
 		printf("%s: Error getting number of CPUs status = \n",
@@ -181,7 +181,7 @@ Status query_cpu_stats()
 	// Output the clock values of the Cpus
 	for (int i = 0; i < onlineCpuIndex; i++)
 	{
-		getCpuClocks(onlineCpus[i], readBuf);
+		get_cpu_clocks(onlineCpus[i], readBuf);
 		printf("Cpu%d running at %s Khz\n", onlineCpus[i], strtok(readBuf, "\n"));
 	}
 	
