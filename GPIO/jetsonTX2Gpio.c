@@ -12,7 +12,8 @@
  *
  *  returns SUCCESS
  */
-Status gpio_export
+Status
+gpio_export
 (
     TX2GPIO gpio
 )
@@ -49,7 +50,8 @@ cleanup:
  *
  *  returns SUCCESS
  */
-Status gpio_unexport
+Status
+gpio_unexport
 (
     TX2GPIO gpio
 )
@@ -87,7 +89,8 @@ cleanup:
  *
  *  returns SUCCESS
  */
-Status gpio_set_direction
+Status
+gpio_set_direction
 (
     TX2GPIO gpio,
     GPIO_PIN_DIRECTION direction
@@ -139,7 +142,8 @@ cleanup:
  *
  *  returns SUCCESS
  */
-Status gpio_set_value
+Status
+gpio_set_value
 (
     TX2GPIO gpio,
     GPIO_PIN_VALUE value
@@ -191,7 +195,8 @@ cleanup:
  *
  *  returns SUCCESS
  */
-Status gpio_get_value
+Status
+gpio_get_value
 (
     TX2GPIO gpio,
     GPIO_PIN_VALUE *value
@@ -242,7 +247,8 @@ cleanup:
  *
  *  returns SUCCESS
  */
-Status gpio_set_edge
+Status
+gpio_set_edge
 (
     TX2GPIO gpio,
     GPIO_PIN_EDGE edge
@@ -250,8 +256,7 @@ Status gpio_set_edge
 {
     int     fd;
     char    buf[BUF_SIZE];
-    char    dirBuffer[BUF_SIZE];
-    int     bufLen, dirLen;
+    int     bufLen;
     Status  status = SUCCESS;
 
     status = _gpio_open_file(gpio, GPIO_FILE_MODE_WRITE, "/edge", &fd);
@@ -301,7 +306,8 @@ cleanup:
  *
  *  returns SUCCESS
  */
-Status gpio_active_low
+Status
+gpio_active_low
 (
     TX2GPIO gpio,
     GPIO_ACTIVE_LOW activeLow
@@ -365,14 +371,14 @@ gpio_open
     Status  status = SUCCESS;
 
     // DEBUG
-    // length = snprintf(dirBuffer,
-    //                sizeof(dirBuffer),
-    //                GPIO_DIR "/gpio%d/value",
-    //                gpio);
-    length = snprintf(dirBuffer,
-                  sizeof(dirBuffer),
-                  "/home/minhn/Tests/gpio%d/value",
-                  gpio);
+     length = snprintf(dirBuffer,
+                    sizeof(dirBuffer),
+                    GPIO_DIR "/gpio%d/value",
+                    gpio);
+    //length = snprintf(dirBuffer,
+                  //sizeof(dirBuffer),
+                  //"/home/minhn/Tests/gpio%d/value",
+                  //gpio);
     if (length < 0)
     {
         printf("%s: Error formatting directory\n", __FUNCTION__);
@@ -439,14 +445,14 @@ _gpio_open_file
     Status  status = SUCCESS;
 
     // DEBUG
-    // length = snprintf(dirBuffer,
-    //                sizeof(dirBuffer),
-    //                GPIO_DIR "/gpio%d",
-    //                gpio);
-    length = snprintf(dirBuffer,
-                  sizeof(dirBuffer),
-                  "/home/minhn/Tests/gpio%d",
-                  gpio);
+     length = snprintf(dirBuffer,
+                    sizeof(dirBuffer),
+                    GPIO_DIR "/gpio%d",
+                    gpio);
+    //length = snprintf(dirBuffer,
+                  //sizeof(dirBuffer),
+                  //"/home/minhn/Tests/gpio%d",
+                  //gpio);
     if (length < 0)
     {
         printf("%s: Error formatting directory\n", __FUNCTION__);
@@ -475,17 +481,69 @@ _gpio_open_file
     return status;
 }
 
+/*!
+ *  Simple test to turn LED on/off at gpio pin 298
+ */
+Status
+ledTest1()
+{
+    GPIO_PIN_VALUE val;
+    Status status = SUCCESS;
+
+    status = gpio_export(gpio298);
+    if (status != SUCCESS)
+    {
+		printf("%s: gpio%d may be exported already\n",
+				__FUNCTION__, gpio298);
+		goto cleanup;
+	}
+
+    status = gpio_set_direction(gpio298, GPIO_DIRECTION_OUTPUT);
+    if (status != SUCCESS)
+    {
+		printf("%s: gpio%d set direction error\n",
+				__FUNCTION__, gpio298);
+	}
+
+    for (int i = 0; i < 100; i++)
+    {
+		usleep(100000);
+		if (i % 2 == 0)
+		{
+			status = gpio_set_value(gpio298, GPIO_PIN_VALUE_HIGH);
+		}
+		else
+		{
+			status = gpio_set_value(gpio298, GPIO_PIN_VALUE_LOW);
+		}
+		if (status != SUCCESS)
+		{
+			printf("%s: gpio%d set value error\n",
+				__FUNCTION__, gpio298);
+		}
+
+		status = gpio_get_value(gpio298, &val);
+		if (status != SUCCESS)
+		{
+			printf("%s: gpio%d get value error\n",
+				__FUNCTION__, gpio298);
+		}
+		printf("write gpio%d value: %d\n", gpio298, val);
+	}
+
+cleanup:
+    gpio_unexport(gpio298);
+    return status;
+}
+
 // Testing
 int main()
 {
-    GPIO_PIN_VALUE val;
-    gpio_export(gpio298);
-    gpio_set_direction(gpio298, GPIO_DIRECTION_INPUT);
-    gpio_set_value(gpio298, GPIO_PIN_VALUE_LOW);
-    gpio_get_value(gpio298, &val);
-    printf("%d\n", val);
-    gpio_set_edge(gpio298, GPIO_PIN_EDGE_BOTH);
-    gpio_active_low(gpio298, GPIO_ACTIVE_LOW_TRUE);
-    gpio_unexport(gpio298);
+	Status status = SUCCESS;
+	status = ledTest1();
+	if (status != SUCCESS)
+	{
+		return -1;
+	}
     return 0;
 }
