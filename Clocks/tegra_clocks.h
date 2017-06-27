@@ -2,8 +2,8 @@
 #define TEGRA_CLOCKS_H
 
 #include "../Common/inc/jetsonStatus.h"
+#include "../Common/inc/jetsonConstants.h"
 
-#define MAXBUF     64
 #define SYSTEM_CPU_DIR "/sys/devices/system/cpu"
 
 Status get_num_cpus(int *totalCpus);

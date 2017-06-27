@@ -2,9 +2,9 @@
 #define TX2_GPIO_H
 
 #include "../Common/inc/jetsonStatus.h"
+#include "../Common/inc/jetsonConstants.h"
 
 #define GPIO_DIR "/sys/class/gpio"
-#define BUF_SIZE 64
 
 typedef enum {
     gpio298 = 298,  // Pin 31 GPIO9_MOTION_INT

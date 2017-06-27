@@ -26,7 +26,7 @@ get_num_cpus
 )
 {
     FILE    *pFile;
-    char    readBuf[MAXBUF];
+    char    readBuf[BUF_SIZE];
     Status  status = SUCCESS;
     int     cpuCount = 0;
 
@@ -61,7 +61,7 @@ get_cpu_clocks
 )
 {
     FILE *cpuFile;
-    char cpuDirBuffer[MAXBUF];
+    char cpuDirBuffer[BUF_SIZE];
     Status status = SUCCESS;
 
     if (snprintf(cpuDirBuffer, sizeof(cpuDirBuffer),
@@ -81,7 +81,7 @@ get_cpu_clocks
     }
 
     // copy cpu clock value back into buf
-    if (fgets(buf, MAXBUF, cpuFile) == NULL)
+    if (fgets(buf, BUF_SIZE, cpuFile) == NULL)
     {
         printf("%s: Error reading file\n", __FUNCTION__);
         status = FILE_HANDLING_ERROR;
@@ -97,8 +97,8 @@ end:
 Status
 query_cpu_stats()
 {
-    char   readBuf[MAXBUF];
-    char   tempBuf[MAXBUF];
+    char   readBuf[BUF_SIZE];
+    char   tempBuf[BUF_SIZE];
     FILE   *fp_online, *fp_offline;
     int    *onlineCpus = NULL;
     int    readBufIndex = 0, onlineCpuIndex = 0, tempBufIndex = 0, numCpus;
@@ -224,6 +224,7 @@ query_cpu_stats()
     return SUCCESS;
 }
 
+// Testing
 int main(int argc, char **argv)
 {
     Status status;
