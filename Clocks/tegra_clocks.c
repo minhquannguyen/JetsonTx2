@@ -9,8 +9,8 @@
 void
 parse_args
 (
-    char **cmd_line,
-    int *status
+    char    **cmd_line,
+    TxU32   *status
 )
 {
     while (*cmd_line)
@@ -22,13 +22,13 @@ parse_args
 Status
 get_num_cpus
 (
-    int *totalCpus
+    TxU32 *totalCpus
 )
 {
     FILE    *pFile;
     char    readBuf[BUF_SIZE];
     Status  status = SUCCESS;
-    int     cpuCount = 0;
+    TxU32   cpuCount = 0;
 
     pFile = fopen("/proc/cpuinfo", "r");
     if (!pFile)
@@ -56,8 +56,8 @@ end:
 Status
 get_cpu_clocks
 (
-    int gpuID,
-    char buf[]
+    TxU32   gpuID,
+    char    buf[]
 )
 {
     FILE *cpuFile;
@@ -97,19 +97,19 @@ end:
 Status
 query_cpu_stats()
 {
-    char   readBuf[BUF_SIZE];
-    char   tempBuf[BUF_SIZE];
-    FILE   *fp_online, *fp_offline;
-    int    *onlineCpus = NULL;
-    int    readBufIndex = 0, onlineCpuIndex = 0, tempBufIndex = 0, numCpus;
-    Status status = SUCCESS;
+    char    readBuf[BUF_SIZE];
+    char    tempBuf[BUF_SIZE];
+    FILE    *fp_online, *fp_offline;
+    TxU32   *onlineCpus = NULL;
+    TxU32   readBufIndex = 0, onlineCpuIndex = 0, tempBufIndex = 0, numCpus;
+    Status  status = SUCCESS;
 
     memset(readBuf, 0, sizeof(readBuf));
 
     status = get_num_cpus(&numCpus);
     if (status != SUCCESS)
     {
-        printf("%s: Error getting number of CPUs status = \n",
+        printf("%s: Error getting number of CPUs status = 0x%x\n",
                 __FUNCTION__, status);
         return status;
     }
@@ -194,7 +194,7 @@ query_cpu_stats()
     memset(readBuf, 0, sizeof(readBuf));
 
     // Output the clock values of the Cpus
-    for (int i = 0; i < onlineCpuIndex; i++)
+    for (TxU32 i = 0; i < onlineCpuIndex; i++)
     {
         get_cpu_clocks(onlineCpus[i], readBuf);
         printf("Cpu%d running at %s Khz\n", onlineCpus[i], strtok(readBuf, "\n"));

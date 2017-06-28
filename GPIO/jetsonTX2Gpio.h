@@ -41,7 +41,7 @@ typedef enum {
     GPIO_ACTIVE_LOW_TRUE
 } GPIO_ACTIVE_LOW;
 
-static Status _gpio_open_file(TX2_GPIO gpio, GPIO_FILE_MODE mode, char *dirToOpen, int *fd);
+static Status _gpio_open_file(TX2_GPIO gpio, GPIO_FILE_MODE mode, char *dirToOpen, TxS32 *fd);
 Status gpio_export(TX2_GPIO gpio);
 Status gpio_unexport(TX2_GPIO gpio);
 Status gpio_set_direction(TX2_GPIO gpio, GPIO_PIN_DIRECTION direction);
@@ -49,7 +49,7 @@ Status gpio_set_value(TX2_GPIO gpio, GPIO_PIN_VALUE value);
 Status gpio_get_value(TX2_GPIO gpio, GPIO_PIN_VALUE *value);
 Status gpio_set_edge(TX2_GPIO gpio, GPIO_PIN_EDGE edge);
 Status gpio_active_low(TX2_GPIO gpio, GPIO_ACTIVE_LOW activeLow);
-Status gpio_open(TX2_GPIO gpio, int *fd);
-Status gpio_close(int *fd);
+Status gpio_open(TX2_GPIO gpio, TxS32 *fd);
+Status gpio_close(TxS32 *fd);
 
 #endif

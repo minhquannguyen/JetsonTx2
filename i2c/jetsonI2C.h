@@ -17,6 +17,10 @@ typedef enum
 
 // Need device register values to read/write
 
-Status i2c_open (I2CDevAddr addr, TX2_I2C_BUS bus, int *fd);
-Status i2c_close (int *fd);
+Status i2c_open (TxU8 addr, TX2_I2C_BUS bus, TxS32 *fd);
+Status i2c_close (TxS32 *fd);
+Status i2c_smbus_write_word (TxU8 reg, TxU32 writeVal, TxS32 fd);
+Status i2c_smbus_read_word (TxU8 reg, TxS32 fd, TxU32 *result);
+Status i2c_write_word (TxU8 reg, TxU32 writeVal, TxS32 fd);
+Status i2c_read_word (TxU8 reg, TxS32 fd, TxU32 *result);
 #endif

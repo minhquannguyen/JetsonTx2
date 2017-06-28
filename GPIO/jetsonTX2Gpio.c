@@ -18,7 +18,8 @@ gpio_export
     TX2_GPIO gpio
 )
 {
-    int     fd, length;
+    TxS32   fd;
+    TxU32   length;
     char    gpioBuffer[BUF_SIZE];
     Status  status = SUCCESS;
 
@@ -26,7 +27,7 @@ gpio_export
     if (fd < 0)
     {
         printf("%s: Error opening gpio/export\n", __FUNCTION__);
-        return FILE_HANDLING_ERROR;
+        return FILE_OPEN_ERROR;
     }
 
     length = snprintf(gpioBuffer, sizeof(gpioBuffer), "%d", gpio);
@@ -55,7 +56,8 @@ gpio_unexport
     TX2_GPIO gpio
 )
 {
-    int     fd, length;
+    TxS32   fd;
+    TxU32   length;
     char    gpioBuffer[BUF_SIZE];
     Status  status = SUCCESS;
 
@@ -63,7 +65,7 @@ gpio_unexport
     if (fd < 0)
     {
         printf("%s: Error opening gpio/unexport\n", __FUNCTION__);
-        return FILE_HANDLING_ERROR;
+        return FILE_OPEN_ERROR;
     }
 
     length = snprintf(gpioBuffer, sizeof(gpioBuffer), "%d", gpio);
@@ -90,11 +92,11 @@ cleanup:
 Status
 gpio_set_direction
 (
-    TX2_GPIO gpio,
-    GPIO_PIN_DIRECTION direction
+    TX2_GPIO            gpio,
+    GPIO_PIN_DIRECTION  direction
 )
 {
-    int     fd;
+    TxS32   fd;
     Status  status = SUCCESS;
 
     status = _gpio_open_file(gpio, GPIO_FILE_MODE_WRITE, "/direction", &fd);
@@ -143,11 +145,11 @@ cleanup:
 Status
 gpio_set_value
 (
-    TX2_GPIO gpio,
-    GPIO_PIN_VALUE value
+    TX2_GPIO        gpio,
+    GPIO_PIN_VALUE  value
 )
 {
-    int     fd;
+    TxS32   fd;
     Status  status = SUCCESS;
 
     status = _gpio_open_file(gpio, GPIO_FILE_MODE_WRITE, "/value", &fd);
@@ -196,11 +198,11 @@ cleanup:
 Status
 gpio_get_value
 (
-    TX2_GPIO gpio,
-    GPIO_PIN_VALUE *value
+    TX2_GPIO        gpio,
+    GPIO_PIN_VALUE  *value
 )
 {
-    int     fd;
+    TxS32   fd;
     char    val;
     Status  status = SUCCESS;
     *value = 0;
@@ -208,7 +210,7 @@ gpio_get_value
     status = _gpio_open_file(gpio, GPIO_FILE_MODE_READ, "/value", &fd);
     if (status != SUCCESS)
     {
-        printf("%s: gpioOpenFile failed status = %d\n",
+        printf("%s: gpioOpenFile failed status = 0x%x\n",
             __FUNCTION__, status);
         goto cleanup;
     }
@@ -248,19 +250,19 @@ cleanup:
 Status
 gpio_set_edge
 (
-    TX2_GPIO gpio,
-    GPIO_PIN_EDGE edge
+    TX2_GPIO        gpio,
+    GPIO_PIN_EDGE   edge
 )
 {
-    int     fd;
+    TxS32   fd;
     char    buf[BUF_SIZE];
-    int     bufLen;
+    TxU32   bufLen;
     Status  status = SUCCESS;
 
     status = _gpio_open_file(gpio, GPIO_FILE_MODE_WRITE, "/edge", &fd);
     if (status != SUCCESS)
     {
-        printf("%s: gpioOpenFile failed status = %d\n",
+        printf("%s: gpioOpenFile failed status = 0x%x\n",
             __FUNCTION__, status);
         goto cleanup;
     }
@@ -307,17 +309,17 @@ cleanup:
 Status
 gpio_active_low
 (
-    TX2_GPIO gpio,
+    TX2_GPIO        gpio,
     GPIO_ACTIVE_LOW activeLow
 )
 {
-    int     fd;
+    TxS32   fd;
     Status  status = SUCCESS;
 
     status = _gpio_open_file(gpio, GPIO_FILE_MODE_WRITE, "/active_low", &fd);
     if (status != SUCCESS)
     {
-        printf("%s: gpioOpenFile failed status = %d\n",
+        printf("%s: gpioOpenFile failed status = 0x%x\n",
             __FUNCTION__, status);
         goto cleanup;
     }
@@ -360,11 +362,11 @@ cleanup:
 Status
 gpio_open
 (
-    TX2_GPIO gpio,
-    int *fd
+    TX2_GPIO    gpio,
+    TxS32       *fd
 )
 {
-    int     length;
+    TxU32   length;
     char    dirBuffer[BUF_SIZE];
     Status  status = SUCCESS;
 
@@ -382,7 +384,7 @@ gpio_open
     if (*fd < 0)
     {
         printf("%s: Error opening %s\n", __FUNCTION__, dirBuffer);
-        return FILE_HANDLING_ERROR;
+        return FILE_OPEN_ERROR;
     }
 
     return status;
@@ -398,14 +400,16 @@ gpio_open
 Status
 gpio_close
 (
-    int *fd
+    TxS32 *fd
 )
 {
-    Status status = close(*fd);
-    if (status != SUCCESS)
+    Status status = SUCCESS;
+
+    if (close(*fd) < 0)
     {
-        printf("%s: Error closing GPIO file status = %d\n",
+        printf("%s: Error closing GPIO file status = 0x%x\n",
             __FUNCTION__, status);
+        status = FILE_CLOSE_ERROR;
     }
 
     return status;
@@ -426,13 +430,13 @@ gpio_close
 static Status
 _gpio_open_file
 (
-    TX2_GPIO gpio,
-    GPIO_FILE_MODE mode,
-    char *dirToOpen,
-    int *fd
+    TX2_GPIO        gpio,
+    GPIO_FILE_MODE  mode,
+    char            *dirToOpen,
+    TxS32           *fd
 )
 {
-    int     length;
+    TxU32   length;
     char    dirBuffer[BUF_SIZE];
     Status  status = SUCCESS;
 
@@ -461,7 +465,7 @@ _gpio_open_file
     if (*fd < 0)
     {
         printf("%s: Error opening %s\n", __FUNCTION__, dirBuffer);
-        return FILE_HANDLING_ERROR;
+        return FILE_OPEN_ERROR;
     }
 
     return status;

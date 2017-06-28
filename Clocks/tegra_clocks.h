@@ -6,9 +6,9 @@
 
 #define SYSTEM_CPU_DIR "/sys/devices/system/cpu"
 
-Status get_num_cpus(int *totalCpus);
+Status get_num_cpus(TxU32 *totalCpus);
 Status set_cpu_clock();
-Status get_cpu_clocks(int gpuID, char buf[]);
+Status get_cpu_clocks(TxU32 gpuID, char buf[]);
 Status set_gpu_clock();
 Status get_gpu_clocks();
 Status query_cpu_stats();
