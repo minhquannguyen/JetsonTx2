@@ -8,14 +8,14 @@
 /*!
  *  Function to export GPIO pin specified
  *
- *  param[in]   gpio    TX2GPIO Gpio pin
+ *  param[in]   gpio    TX2_GPIO Gpio pin
  *
  *  returns SUCCESS
  */
 Status
 gpio_export
 (
-    TX2GPIO gpio
+    TX2_GPIO gpio
 )
 {
     int     fd, length;
@@ -26,8 +26,7 @@ gpio_export
     if (fd < 0)
     {
         printf("%s: Error opening gpio/export\n", __FUNCTION__);
-        status = FILE_HANDLING_ERROR;
-        goto cleanup;
+        return FILE_HANDLING_ERROR;
     }
 
     length = snprintf(gpioBuffer, sizeof(gpioBuffer), "%d", gpio);
@@ -46,14 +45,14 @@ cleanup:
 /*!
  *  Function to unexport GPIO pin specified
  *
- *  param[in]   gpio    TX2GPIO Gpio pin
+ *  param[in]   gpio    TX2_GPIO Gpio pin
  *
  *  returns SUCCESS
  */
 Status
 gpio_unexport
 (
-    TX2GPIO gpio
+    TX2_GPIO gpio
 )
 {
     int     fd, length;
@@ -64,8 +63,7 @@ gpio_unexport
     if (fd < 0)
     {
         printf("%s: Error opening gpio/unexport\n", __FUNCTION__);
-        status = FILE_HANDLING_ERROR;
-        goto cleanup;
+        return FILE_HANDLING_ERROR;
     }
 
     length = snprintf(gpioBuffer, sizeof(gpioBuffer), "%d", gpio);
@@ -84,7 +82,7 @@ cleanup:
 /*!
  *  Function to set direction of GPIO pin specified
  *
- *  param[in]   gpio        TX2GPIO Gpio pin
+ *  param[in]   gpio        TX2_GPIO Gpio pin
  *  param[in]   direction   Pin Direction (input, output)
  *
  *  returns SUCCESS
@@ -92,7 +90,7 @@ cleanup:
 Status
 gpio_set_direction
 (
-    TX2GPIO gpio,
+    TX2_GPIO gpio,
     GPIO_PIN_DIRECTION direction
 )
 {
@@ -137,7 +135,7 @@ cleanup:
 /*!
  *  Function to set value of GPIO pin specified
  *
- *  param[in]   gpio    TX2GPIO Gpio pin
+ *  param[in]   gpio    TX2_GPIO Gpio pin
  *  param[in]   value   Pin Value (low/0, high/1)
  *
  *  returns SUCCESS
@@ -145,7 +143,7 @@ cleanup:
 Status
 gpio_set_value
 (
-    TX2GPIO gpio,
+    TX2_GPIO gpio,
     GPIO_PIN_VALUE value
 )
 {
@@ -190,15 +188,15 @@ cleanup:
 /*!
  *  Function to get value of GPIO pin specified
  *
- *  param[in]   gpio    TX2GPIO Gpio pin
- *  param[out]  value   Pin Value (low/0, high/1)
+ *  param[in]   gpio    TX2_GPIO Gpio pin
+ *  param[out]  value   Pin Value pointer (low/0, high/1)
  *
  *  returns SUCCESS
  */
 Status
 gpio_get_value
 (
-    TX2GPIO gpio,
+    TX2_GPIO gpio,
     GPIO_PIN_VALUE *value
 )
 {
@@ -242,7 +240,7 @@ cleanup:
 /*!
  *  Function to set edge value of GPIO pin specified
  *
- *  param[in]   gpio    TX2GPIO Gpio pin
+ *  param[in]   gpio    TX2_GPIO Gpio pin
  *  param[in]   edge    Edge Value ("none", "rising", "falling", "both")
  *
  *  returns SUCCESS
@@ -250,7 +248,7 @@ cleanup:
 Status
 gpio_set_edge
 (
-    TX2GPIO gpio,
+    TX2_GPIO gpio,
     GPIO_PIN_EDGE edge
 )
 {
@@ -300,7 +298,7 @@ cleanup:
 /*!
  *  Function to set active_low value of GPIO pin specified
  *
- *  param[in]   gpio        TX2GPIO Gpio pin
+ *  param[in]   gpio        TX2_GPIO Gpio pin
  *  param[in]   activeLow   active_low Value ("none", "rising",
  *                                            "falling", "both")
  *
@@ -309,7 +307,7 @@ cleanup:
 Status
 gpio_active_low
 (
-    TX2GPIO gpio,
+    TX2_GPIO gpio,
     GPIO_ACTIVE_LOW activeLow
 )
 {
@@ -354,15 +352,15 @@ cleanup:
 /*!
  *  Helper function to open GPIO value file specified in RDONLY mode.
  *
- *  param[in]   gpio    TX2GPIO Gpio pin
- *  param[out]  fd      file descriptor
+ *  param[in]   gpio    TX2_GPIO Gpio pin
+ *  param[out]  fd      File descriptor pointer
  *
  *  returns SUCCESS
  */
 Status
 gpio_open
 (
-    TX2GPIO gpio,
+    TX2_GPIO gpio,
     int *fd
 )
 {
@@ -370,15 +368,10 @@ gpio_open
     char    dirBuffer[BUF_SIZE];
     Status  status = SUCCESS;
 
-    // DEBUG
-     length = snprintf(dirBuffer,
+    length = snprintf(dirBuffer,
                     sizeof(dirBuffer),
                     GPIO_DIR "/gpio%d/value",
                     gpio);
-    //length = snprintf(dirBuffer,
-                  //sizeof(dirBuffer),
-                  //"/home/minhn/Tests/gpio%d/value",
-                  //gpio);
     if (length < 0)
     {
         printf("%s: Error formatting directory\n", __FUNCTION__);
@@ -389,7 +382,6 @@ gpio_open
     if (*fd < 0)
     {
         printf("%s: Error opening %s\n", __FUNCTION__, dirBuffer);
-        close(*fd);
         return FILE_HANDLING_ERROR;
     }
 
@@ -399,20 +391,20 @@ gpio_open
 /*!
  *  Helper function to close GPIO file pointed to by fd.
  *
- *  param[in]   fd  GPIO file descriptor
+ *  param[in]   fd  GPIO file descriptor pointer
  *
  *  returns SUCCESS
  */
 Status
 gpio_close
 (
-    int fd
+    int *fd
 )
 {
-    Status status = close(fd);
+    Status status = close(*fd);
     if (status != SUCCESS)
     {
-        printf("%s: gpioClose failed status = %d\n",
+        printf("%s: Error closing GPIO file status = %d\n",
             __FUNCTION__, status);
     }
 
@@ -424,17 +416,17 @@ gpio_close
  *  This function is more generic than gpioOpen.
  *
  *  param[in]   gpio        TX2GPIO Gpio pin
- *  param[in]   dirToOpen   directory ("/value", "/direction",
- *                                     "/edge", "active_low")
  *  param[in]   mode        Gpio file mode (read/write)
- *  param[out]  fd          file descriptor
+ *  param[in]   dirToOpen   Directory ("/value", "/direction",
+ *                                     "/edge", "active_low")
+ *  param[out]  fd          File descriptor
  *
  *  returns SUCCESS
  */
 static Status
 _gpio_open_file
 (
-    TX2GPIO gpio,
+    TX2_GPIO gpio,
     GPIO_FILE_MODE mode,
     char *dirToOpen,
     int *fd
@@ -444,15 +436,10 @@ _gpio_open_file
     char    dirBuffer[BUF_SIZE];
     Status  status = SUCCESS;
 
-    // DEBUG
-     length = snprintf(dirBuffer,
+    length = snprintf(dirBuffer,
                     sizeof(dirBuffer),
                     GPIO_DIR "/gpio%d",
                     gpio);
-    //length = snprintf(dirBuffer,
-                  //sizeof(dirBuffer),
-                  //"/home/minhn/Tests/gpio%d",
-                  //gpio);
     if (length < 0)
     {
         printf("%s: Error formatting directory\n", __FUNCTION__);
@@ -474,7 +461,6 @@ _gpio_open_file
     if (*fd < 0)
     {
         printf("%s: Error opening %s\n", __FUNCTION__, dirBuffer);
-        close(*fd);
         return FILE_HANDLING_ERROR;
     }
 
@@ -493,7 +479,7 @@ ledTest1()
     status = gpio_export(gpio298);
     if (status != SUCCESS)
     {
-		printf("%s: gpio%d may be exported already\n",
+		printf("%s: gpio%d may be exported already or lack permissions\n",
 				__FUNCTION__, gpio298);
 		goto cleanup;
 	}
