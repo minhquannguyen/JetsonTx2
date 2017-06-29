@@ -483,43 +483,43 @@ ledTest1()
     status = gpio_export(gpio298);
     if (status != SUCCESS)
     {
-		printf("%s: gpio%d may be exported already or lack permissions\n",
-				__FUNCTION__, gpio298);
-		goto cleanup;
-	}
+        printf("%s: gpio%d may be exported already or lack permissions\n",
+                __FUNCTION__, gpio298);
+        goto cleanup;
+    }
 
     status = gpio_set_direction(gpio298, GPIO_DIRECTION_OUTPUT);
     if (status != SUCCESS)
     {
-		printf("%s: gpio%d set direction error\n",
-				__FUNCTION__, gpio298);
-	}
+        printf("%s: gpio%d set direction error\n",
+                __FUNCTION__, gpio298);
+    }
 
     for (int i = 0; i < 100; i++)
     {
-		usleep(100000);
-		if (i % 2 == 0)
-		{
-			status = gpio_set_value(gpio298, GPIO_PIN_VALUE_HIGH);
-		}
-		else
-		{
-			status = gpio_set_value(gpio298, GPIO_PIN_VALUE_LOW);
-		}
-		if (status != SUCCESS)
-		{
-			printf("%s: gpio%d set value error\n",
-				__FUNCTION__, gpio298);
-		}
+        usleep(100000);
+        if (i % 2 == 0)
+        {
+            status = gpio_set_value(gpio298, GPIO_PIN_VALUE_HIGH);
+        }
+        else
+        {
+            status = gpio_set_value(gpio298, GPIO_PIN_VALUE_LOW);
+        }
+        if (status != SUCCESS)
+        {
+            printf("%s: gpio%d set value error\n",
+                __FUNCTION__, gpio298);
+        }
 
-		status = gpio_get_value(gpio298, &val);
-		if (status != SUCCESS)
-		{
-			printf("%s: gpio%d get value error\n",
-				__FUNCTION__, gpio298);
-		}
-		printf("write gpio%d value: %d\n", gpio298, val);
-	}
+        status = gpio_get_value(gpio298, &val);
+        if (status != SUCCESS)
+        {
+            printf("%s: gpio%d get value error\n",
+                __FUNCTION__, gpio298);
+        }
+        printf("write gpio%d value: %d\n", gpio298, val);
+    }
 
 cleanup:
     gpio_unexport(gpio298);
@@ -529,11 +529,11 @@ cleanup:
 // Testing
 int main()
 {
-	Status status = SUCCESS;
-	status = ledTest1();
-	if (status != SUCCESS)
-	{
-		return -1;
-	}
+    Status status = SUCCESS;
+    status = ledTest1();
+    if (status != SUCCESS)
+    {
+        return -1;
+    }
     return 0;
 }

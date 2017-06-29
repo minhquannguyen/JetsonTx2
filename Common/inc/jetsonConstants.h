@@ -6,9 +6,9 @@
 #define BYTE_SIZE 8
 #define BYTES_IN_WORD 4
 
-typedef unsigned char 	TxU8;
-typedef unsigned int 	TxU32;
-typedef signed char  	TxS8;
-typedef signed int		TxS32;
+typedef unsigned char   TxU8;
+typedef unsigned int    TxU32;
+typedef signed char     TxS8;
+typedef signed int      TxS32;
 
 #endif

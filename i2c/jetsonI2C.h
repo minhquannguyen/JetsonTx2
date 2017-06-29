@@ -11,8 +11,8 @@ typedef unsigned char I2CDevAddr;
 
 typedef enum
 {
-	I2C_0 = 0,	// Pin 3  I2C_GP_DAT
-	I2C_1		// Pin 27 I2C_GP1_DAT
+    I2C_0 = 0,  // Pin 3  I2C_GP_DAT
+    I2C_1       // Pin 27 I2C_GP1_DAT
 } TX2_I2C_BUS;
 
 // Need device register values to read/write
