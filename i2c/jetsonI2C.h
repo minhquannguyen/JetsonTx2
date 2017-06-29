@@ -15,7 +15,10 @@ typedef enum
     I2C_1       // Pin 27 I2C_GP1_DAT
 } TX2_I2C_BUS;
 
-// Need device register values to read/write
+/*
+ * Need device reister values in order to read/write using i2c
+ * Define here
+ */
 
 Status i2c_open (TxU8 addr, TX2_I2C_BUS bus, TxS32 *fd);
 Status i2c_close (TxS32 *fd);
@@ -23,4 +26,5 @@ Status i2c_smbus_write_word (TxU8 reg, TxU32 writeVal, TxS32 fd);
 Status i2c_smbus_read_word (TxU8 reg, TxS32 fd, TxU32 *result);
 Status i2c_write_word (TxU8 reg, TxU32 writeVal, TxS32 fd);
 Status i2c_read_word (TxU8 reg, TxS32 fd, TxU32 *result);
+
 #endif
