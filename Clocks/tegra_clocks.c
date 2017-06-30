@@ -114,7 +114,7 @@ query_cpu_stats()
         return status;
     }
 
-    onlineCpus = malloc(sizeof(int) * numCpus);
+    onlineCpus = malloc(sizeof(int) * BUF_SIZE);
     if (!onlineCpus)
     {
         printf("%s: Error allocating memory\n", __FUNCTION__);
