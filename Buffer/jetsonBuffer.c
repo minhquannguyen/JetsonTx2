@@ -179,7 +179,7 @@ void
 	ARGS *args = (ARGS *) arg;
 	CIRCULAR_BUF *cBuf = (CIRCULAR_BUF *) args->cBuf;
 
-	for (int i = 0; i < 1000000; i++)
+	for (TxU32 i = 0; i < 1000000; i++)
 	{
 		status = buffer_push(&cBuf, i);
 		if (status != SUCCESS)
@@ -209,7 +209,7 @@ void
 		goto cleanup;
 	}
 
-	for (int i = 0; i < C_BUF_SIZE; i++)
+	for (TxU32 i = 0; i < C_BUF_SIZE; i++)
 	{
 		printf("%d\n", (data[i].data));
 	}
