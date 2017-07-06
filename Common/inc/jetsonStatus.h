@@ -15,6 +15,7 @@ typedef enum
     I2C_READ_ERROR,
     IOCTL_ERROR,
     BUFFER_EMPTY,
+    MUTEX_ERROR,
     GENERIC_ERROR
 } STATUS_VALUES;
 
