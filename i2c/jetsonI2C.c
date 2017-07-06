@@ -174,7 +174,7 @@ i2c_write_word
         mask <<= BYTE_SIZE;
     }
 
-    if (write(fd, writeBuf, 5) < 0)
+    if (write(fd, writeBuf, 5) != 5)
     {
         printf("%s: Error i2c writing 0x%x to address 0x%x\n",
             __FUNCTION__, writeVal, reg);
@@ -224,6 +224,137 @@ i2c_read_word
     for (TxU32 i = 0; i < BYTES_IN_WORD; i++)
     {
         *result |= (readBuf[i] << (WORD_SIZE - (BYTE_SIZE * i)));
+    }
+
+    return status;
+}
+
+/*!
+ *  Function to write byte value to device register through i2c bus specified
+ *  using smbus. This should be equivalent to i2c_write_byte().
+ *
+ *  param[in]  reg          Device register
+ *  param[in]  writeVal     Value to write
+ *  param[in]  fd           File descriptor to i2c bus
+ *
+ *  returns SUCCESS
+ */
+Status
+i2c_smbus_write_byte
+(
+    TxU8    reg,
+    TxU8    writeVal,
+    TxS32   fd
+)
+{
+    Status status = SUCCESS;
+
+    if (i2c_smbus_write_byte_data(fd, reg, writeVal) < 0)
+    {
+        printf("%s: Error i2c writing 0x%x to address 0x%x\n",
+            __FUNCTION__, writeVal, reg);
+        status = I2C_WRITE_ERROR;
+    }
+
+    return status;
+}
+
+/*!
+ *  Function to read byte value from device register through i2c bus specified
+ *  using smbus. This should be equivalent to i2c_read_word().
+ *
+ *  param[in]   reg     Device register
+ *  param[in]   fd      File descriptor to i2c bus
+ *  param[out]  result  Read value pointer
+ *
+ *  returns SUCCESS
+ */
+Status
+i2c_smbus_read_byte
+(
+    TxU8    reg,
+    TxS32   fd,
+    TxU8    *result
+)
+{
+    Status status = SUCCESS;
+
+    *result = i2c_smbus_read_byte_data(fd, reg);
+    if (*result < 0)
+    {
+        printf("%s: Error i2c reading register 0x%x\n",
+            __FUNCTION__, reg);
+        status = I2C_READ_ERROR;
+    }
+
+    return status;
+}
+
+/*!
+ *  Function to write byte value to device register through i2c bus specified
+ *  using i2c write. This should be quivalent to i2c_smbus_write_word().
+ *
+ *  param[in]  reg          Device register
+ *  param[in]  writeVal     Value to write
+ *  param[in]  fd           File descriptor to i2c bus
+ *
+ *  returns SUCCESS
+ */
+Status
+i2c_write_byte
+(
+    TxU8    reg,
+    TxU8    writeVal,
+    TxS32   fd
+)
+{
+    TxU8 writeBuf[2];
+    Status status = SUCCESS;
+    TxU32 mask = 0xff;
+
+    memset(writeBuf, 0, sizeof(writeBuf));
+
+    writeBuf[0] = reg;
+    writeBuf[1] = writeVal;
+
+    if (write(fd, writeBuf, 2) != 2)
+    {
+        printf("%s: Error i2c writing 0x%x to address 0x%x\n",
+            __FUNCTION__, writeVal, reg);
+        status = I2C_WRITE_ERROR;
+    }
+
+    return status;
+}
+
+/*!
+ *  Function to read byte value from device register through i2c bus specified
+ *  using i2c read. This should be quivalent to i2c_smbus_read_word().
+ *
+ *  param[in]   reg     Device register
+ *  param[in]   fd      File descriptor to i2c bus
+ *  param[out]  result  Read value pointer
+ *
+ *  returns SUCCESS
+ */
+Status
+i2c_read_word
+(
+    TxU8    reg,
+    TxS32   fd,
+    TxU8    *result
+)
+{
+    TxU8 readBuf[1];
+    Status status = SUCCESS;
+
+    memset(readBuf, 0, sizeof(readBuf));
+
+    if (read(fd, readBuf, 1) != 1)
+    {
+        printf("%s: Error i2c reading register 0x%x\n",
+            __FUNCTION__, reg);
+        status = I2C_READ_ERROR;
     }
 
     return status;
