@@ -13,209 +13,209 @@
  *  Function to initialize and allocate circular buffer
  *
  *  param[in/out]   cBuf     CIRCULAR_BUF double pointer
- *  param[in]   	bufSize  Desired size of buffer
+ *  param[in]       bufSize  Desired size of buffer
  *
  *  returns SUCCESS
  */
 Status
 buffer_init
 (
-	CIRCULAR_BUF **cBuf,
-	TxU32 bufSize
+    CIRCULAR_BUF **cBuf,
+    TxU32 bufSize
 )
 {
-	Status status = SUCCESS;
+    Status status = SUCCESS;
 
-	CIRCULAR_BUF *buffer = malloc(sizeof(*buffer));
-	if (buffer == NULL)
-	{
+    CIRCULAR_BUF *buffer = malloc(sizeof(*buffer));
+    if (buffer == NULL)
+    {
         printf("%s: Error initializing buffer\n",
             __FUNCTION__);
-		status = INSUFFICIENT_RESOURCES;
-		goto cleanup;
-	}
+        status = INSUFFICIENT_RESOURCES;
+        goto cleanup;
+    }
 
-	CIRCULAR_BUF_DATA *data = malloc(sizeof(*data) * bufSize);
-	if (data == NULL)
-	{
+    CIRCULAR_BUF_DATA *data = malloc(sizeof(*data) * bufSize);
+    if (data == NULL)
+    {
         printf("%s: Error initializing buffer data\n",
             __FUNCTION__);
-		status = INSUFFICIENT_RESOURCES;
-		goto cleanup;
-	}
+        status = INSUFFICIENT_RESOURCES;
+        goto cleanup;
+    }
 
-	if (pthread_mutex_init(&buffer->bufLock, NULL) != 0)
-	{
+    if (pthread_mutex_init(&buffer->bufLock, NULL) != 0)
+    {
         printf("%s: Error initializing buffer data\n",
             __FUNCTION__);
         status = MUTEX_ERROR;
-		goto cleanup;
-	}
+        goto cleanup;
+    }
 
-	buffer->bufferData = data;
-	buffer->head = -1;
-	buffer->tail = -1;
-	buffer->count = 0;
-	buffer->size = bufSize;
-	*cBuf = buffer;
-	return status;
+    buffer->bufferData = data;
+    buffer->head = -1;
+    buffer->tail = -1;
+    buffer->count = 0;
+    buffer->size = bufSize;
+    *cBuf = buffer;
+    return status;
 
 cleanup:
-	free(buffer);
-	free(data);
-	return status;
+    free(buffer);
+    free(data);
+    return status;
 }
 
 /*!
  *  Function to add data to circular buffer
  *
  *  param[in/out]   cBuf  CIRCULAR_BUF double pointer
- *  param[in]   	data  Data to add (Subject to change)
+ *  param[in]       data  Data to add (Subject to change)
  *
  *  returns SUCCESS
  */
 Status
 buffer_push
 (
-	CIRCULAR_BUF **cBuf,
-	TxU32 data
+    CIRCULAR_BUF **cBuf,
+    TxU32 data
 )
 {
-	Status status = SUCCESS;
+    Status status = SUCCESS;
 
-	pthread_mutex_lock(&(*cBuf)->bufLock);
-	if ((*cBuf)->count == 0)
-	{
-		(*cBuf)->head = 0;
-		(*cBuf)->tail = 0;
-		(*cBuf)->count++;
-		(*cBuf)->bufferData[0].data = data;
-		goto cleanup;
-	}
+    pthread_mutex_lock(&(*cBuf)->bufLock);
+    if ((*cBuf)->count == 0)
+    {
+        (*cBuf)->head = 0;
+        (*cBuf)->tail = 0;
+        (*cBuf)->count++;
+        (*cBuf)->bufferData[0].data = data;
+        goto cleanup;
+    }
 
-	(*cBuf)->tail = ((*cBuf)->tail + 1) % (*cBuf)->size;
-	(*cBuf)->bufferData[(*cBuf)->tail].data = data;
+    (*cBuf)->tail = ((*cBuf)->tail + 1) % (*cBuf)->size;
+    (*cBuf)->bufferData[(*cBuf)->tail].data = data;
 
-	if ((*cBuf)->count == (*cBuf)->size)
-	{
-		(*cBuf)->head = ((*cBuf)->head + 1) % (*cBuf)->size;
-		goto cleanup;
-	}
+    if ((*cBuf)->count == (*cBuf)->size)
+    {
+        (*cBuf)->head = ((*cBuf)->head + 1) % (*cBuf)->size;
+        goto cleanup;
+    }
 
-	(*cBuf)->count++;
+    (*cBuf)->count++;
 
 cleanup:
-	pthread_mutex_unlock(&(*cBuf)->bufLock);
-	return status;
+    pthread_mutex_unlock(&(*cBuf)->bufLock);
+    return status;
 }
 
 /*!
  *  Function to get snapshot of the whole circular buffer
  *
- *  param[in]   cBuf  		CIRCULAR_BUF double pointer
- *  param[in]   snapshot 	CIRCULAR_BUF_DATA pointer
+ *  param[in]   cBuf        CIRCULAR_BUF double pointer
+ *  param[in]   snapshot    CIRCULAR_BUF_DATA pointer
  *
  *  returns SUCCESS
  */
 Status
 buffer_get_snapshot
 (
-	CIRCULAR_BUF **cBuf,
-	CIRCULAR_BUF_DATA *snapshot
+    CIRCULAR_BUF **cBuf,
+    CIRCULAR_BUF_DATA *snapshot
 )
 {
-	Status status = SUCCESS;
+    Status status = SUCCESS;
 
-	pthread_mutex_lock(&(*cBuf)->bufLock);
-	if ((*cBuf)->count == 0)
-	{
-		status = BUFFER_EMPTY;
-		goto cleanup;
-	}
+    pthread_mutex_lock(&(*cBuf)->bufLock);
+    if ((*cBuf)->count == 0)
+    {
+        status = BUFFER_EMPTY;
+        goto cleanup;
+    }
 
-	TxU32 j = (*cBuf)->head;
-	for (TxU32 i = 0; i < (*cBuf)->size; i++)
-	{
-		snapshot[i].data = (*cBuf)->bufferData[j].data;
-		j = (j + 1) % (*cBuf)->size;
-	}
+    TxU32 j = (*cBuf)->head;
+    for (TxU32 i = 0; i < (*cBuf)->size; i++)
+    {
+        snapshot[i].data = (*cBuf)->bufferData[j].data;
+        j = (j + 1) % (*cBuf)->size;
+    }
 
 cleanup:
-	pthread_mutex_unlock(&(*cBuf)->bufLock);
-	return status;
+    pthread_mutex_unlock(&(*cBuf)->bufLock);
+    return status;
 }
 
 /*!
  *  Function to free allocated circular buffer
  *
- *  param[in] 	cBuf  CIRCULAR_BUF double pointer
+ *  param[in]   cBuf  CIRCULAR_BUF double pointer
  *
  *  returns SUCCESS
  */
 Status
 buffer_free
 (
-	CIRCULAR_BUF **cBuf
+    CIRCULAR_BUF **cBuf
 )
 {
-	Status status = SUCCESS;
-	free((*cBuf)->bufferData);
-	free(*cBuf);
-	return status;
+    Status status = SUCCESS;
+    free((*cBuf)->bufferData);
+    free(*cBuf);
+    return status;
 }
 
 typedef struct
 {
-	CIRCULAR_BUF *cBuf;
+    CIRCULAR_BUF *cBuf;
 } ARGS;
 
 void
 *pushValues
 (
-	void *arg
+    void *arg
 )
 {
-	Status status = SUCCESS;
-	ARGS *args = (ARGS *) arg;
-	CIRCULAR_BUF *cBuf = (CIRCULAR_BUF *) args->cBuf;
+    Status status = SUCCESS;
+    ARGS *args = (ARGS *) arg;
+    CIRCULAR_BUF *cBuf = (CIRCULAR_BUF *) args->cBuf;
 
-	for (TxU32 i = 0; i < 1000000; i++)
-	{
-		status = buffer_push(&cBuf, i);
-		if (status != SUCCESS)
-		{
-	        printf("%s: Buffer push failed status: 0x%x\n",
-	            __FUNCTION__, status);
-		}
-	}
+    for (TxU32 i = 0; i < 1000000; i++)
+    {
+        status = buffer_push(&cBuf, i);
+        if (status != SUCCESS)
+        {
+            printf("%s: Buffer push failed status: 0x%x\n",
+                __FUNCTION__, status);
+        }
+    }
 }
 
 void
 *readValues
 (
-	void *arg
+    void *arg
 )
 {
-	Status status = SUCCESS;
-	ARGS *args = (ARGS *) arg;
-	CIRCULAR_BUF *cBuf = (CIRCULAR_BUF *) args->cBuf;
-	CIRCULAR_BUF_DATA *data = malloc(sizeof(*data) * C_BUF_SIZE);
+    Status status = SUCCESS;
+    ARGS *args = (ARGS *) arg;
+    CIRCULAR_BUF *cBuf = (CIRCULAR_BUF *) args->cBuf;
+    CIRCULAR_BUF_DATA *data = malloc(sizeof(*data) * C_BUF_SIZE);
 
-	status = buffer_get_snapshot(&cBuf, data);
-	if (status != SUCCESS)
-	{
+    status = buffer_get_snapshot(&cBuf, data);
+    if (status != SUCCESS)
+    {
         printf("%s: Buffer snapshot failed status: 0x%x\n",
             __FUNCTION__, status);
-		goto cleanup;
-	}
+        goto cleanup;
+    }
 
-	for (TxU32 i = 0; i < C_BUF_SIZE; i++)
-	{
-		printf("%d\n", (data[i].data));
-	}
+    for (TxU32 i = 0; i < C_BUF_SIZE; i++)
+    {
+        printf("%d\n", (data[i].data));
+    }
 
 cleanup:
-	free(data);
+    free(data);
 }
 
 /*!
@@ -230,44 +230,44 @@ cleanup:
 Status
 test()
 {
-	Status status = SUCCESS;
-	CIRCULAR_BUF *cBuf;
-	pthread_t tid[2];
-	ARGS *args;
+    Status status = SUCCESS;
+    CIRCULAR_BUF *cBuf;
+    pthread_t tid[2];
+    ARGS *args;
 
-	status = buffer_init(&cBuf, C_BUF_SIZE);
-	if (status != SUCCESS)
-	{
+    status = buffer_init(&cBuf, C_BUF_SIZE);
+    if (status != SUCCESS)
+    {
         printf("%s: Buffer init failed status: 0x%x\n",
             __FUNCTION__, status);
-		goto cleanup;
-	}
+        goto cleanup;
+    }
 
-	args = malloc(sizeof(*args));
-	if (args == NULL)
-	{
+    args = malloc(sizeof(*args));
+    if (args == NULL)
+    {
         printf("%s: Error initializing args status\n",
             __FUNCTION__);
-		status = INSUFFICIENT_RESOURCES;
-		goto cleanup;
-	}
-	args->cBuf = cBuf;
+        status = INSUFFICIENT_RESOURCES;
+        goto cleanup;
+    }
+    args->cBuf = cBuf;
 
-	pthread_create(&(tid[0]), NULL, &pushValues, args);
-	pthread_create(&(tid[1]), NULL, &readValues, args);
+    pthread_create(&(tid[0]), NULL, &pushValues, args);
+    pthread_create(&(tid[1]), NULL, &readValues, args);
 
-	pthread_join(tid[0], NULL);
-	pthread_join(tid[1], NULL);
+    pthread_join(tid[0], NULL);
+    pthread_join(tid[1], NULL);
 
 cleanup:
-	free(args);
-	buffer_free(&cBuf);
-	return status;
+    free(args);
+    buffer_free(&cBuf);
+    return status;
 }
 
 // test
 int main()
 {
-	test();
-	return 0;
+    test();
+    return 0;
 }
