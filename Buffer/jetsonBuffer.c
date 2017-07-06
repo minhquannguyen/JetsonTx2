@@ -52,12 +52,12 @@ buffer_init
         goto cleanup;
     }
 
-    buffer->bufferData = data;
-    buffer->head = -1;
-    buffer->tail = -1;
-    buffer->count = 0;
-    buffer->size = bufSize;
-    *cBuf = buffer;
+    buffer->bufferData  = data;
+    buffer->head        = -1;
+    buffer->tail        = -1;
+    buffer->count       = 0;
+    buffer->size        = bufSize;
+    *cBuf               = buffer;
     return status;
 
 cleanup:
@@ -175,9 +175,9 @@ void
     void *arg
 )
 {
-    Status status = SUCCESS;
-    ARGS *args = (ARGS *) arg;
-    CIRCULAR_BUF *cBuf = (CIRCULAR_BUF *) args->cBuf;
+    Status          status = SUCCESS;
+    ARGS            *args  = (ARGS *) arg;
+    CIRCULAR_BUF    *cBuf  = (CIRCULAR_BUF *) args->cBuf;
 
     for (TxU32 i = 0; i < 1000000; i++)
     {
@@ -196,10 +196,10 @@ void
     void *arg
 )
 {
-    Status status = SUCCESS;
-    ARGS *args = (ARGS *) arg;
-    CIRCULAR_BUF *cBuf = (CIRCULAR_BUF *) args->cBuf;
-    CIRCULAR_BUF_DATA *data = malloc(sizeof(*data) * C_BUF_SIZE);
+    Status              status  = SUCCESS;
+    ARGS                *args   = (ARGS *) arg;
+    CIRCULAR_BUF        *cBuf   = (CIRCULAR_BUF *) args->cBuf;
+    CIRCULAR_BUF_DATA   *data   = malloc(sizeof(*data) * C_BUF_SIZE);
 
     status = buffer_get_snapshot(&cBuf, data);
     if (status != SUCCESS)
