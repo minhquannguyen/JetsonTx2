@@ -6,7 +6,8 @@
 
 #define GPIO_DIR "/sys/class/gpio"
 
-typedef enum {
+typedef enum
+{
     gpio298 = 298,  // Pin 31 GPIO9_MOTION_INT
     gpio388 = 388,  // pin 37 GPIO8_ALS_PROX_INT
     gpio389 = 389,  // Pin 33 GPIO11_AP_WAKE_BT
@@ -14,29 +15,34 @@ typedef enum {
     gpio481 = 481   // Pin 18 GPIO16_MDM_WAKE_AP
 } TX2_GPIO;
 
-typedef enum {
+typedef enum
+{
     GPIO_FILE_MODE_READ = 0,
     GPIO_FILE_MODE_WRITE
 } GPIO_FILE_MODE;
 
-typedef enum {
+typedef enum
+{
     GPIO_DIRECTION_INPUT = 0,
     GPIO_DIRECTION_OUTPUT
 } GPIO_PIN_DIRECTION;
 
-typedef enum {
+typedef enum
+{
     GPIO_PIN_VALUE_LOW = 0,
     GPIO_PIN_VALUE_HIGH
 } GPIO_PIN_VALUE;
 
-typedef enum {
+typedef enum
+{
     GPIO_PIN_EDGE_NONE = 0,
     GPIO_PIN_EDGE_RISING,
     GPIO_PIN_EDGE_FALLING,
     GPIO_PIN_EDGE_BOTH
 } GPIO_PIN_EDGE;
 
-typedef enum {
+typedef enum
+{
     GPIO_ACTIVE_LOW_FALSE = 0,
     GPIO_ACTIVE_LOW_TRUE
 } GPIO_ACTIVE_LOW;
