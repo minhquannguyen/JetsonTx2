@@ -185,9 +185,15 @@ void
     Status          status = SUCCESS;
     CBUF_ARGS       *args  = (CBUF_ARGS *) arg;
     CIRCULAR_BUF    *cBuf  = (CIRCULAR_BUF *) args->cBuf;
+    TxU32           r;
 
-    for (TxU32 i = 0; i < 1000000; i++)
+    srand(time(NULL));
+
+    for (TxU32 i = 0; i < 1000; i++)
     {
+        r = rand() % 1000;
+        usleep(r);
+
         status = buffer_push(&cBuf, i);
         if (status != SUCCESS)
         {
@@ -207,9 +213,15 @@ void
     CBUF_ARGS           *args   = (CBUF_ARGS *) arg;
     CIRCULAR_BUF        *cBuf   = (CIRCULAR_BUF *) args->cBuf;
     CIRCULAR_BUF_DATA   *data   = malloc(sizeof(*data) * C_BUF_SIZE);
+    TxU32               r;
+
+    srand(time(NULL));
 
     for (TxU32 i = 0; i < 100; i++)
     {
+        r = rand() % 1000;
+        usleep(r);
+
         status = buffer_get_snapshot(&cBuf, data);
         if (status != SUCCESS)
         {
@@ -217,12 +229,25 @@ void
                 __FUNCTION__, status);
             goto cleanup;
         }
-        printf("New data:\n");
-        for (TxU32 i = 0; i < C_BUF_SIZE; i++)
+
+        for (TxU32 i = 0; i < C_BUF_SIZE - 1; i++)
         {
-            printf("%d\n", (data[i].data));
+            // wait for buffer to be filled with valid data
+            if (data[i+1].data == 0)
+            {
+                break;
+            }
+            else
+            {
+                if (data[i+1].data - data[i].data != 1)
+                {
+                    printf("Circular buffer test failed\n");
+                }
+            }
         }
     }
+
+    printf("Circular buffer test passed\n");
 
 cleanup:
     free(data);
@@ -471,7 +496,6 @@ void
     {
         r = rand() % 1000;
         usleep(r);
-
         status = queue_enqueue(&q, i);
         if (status != SUCCESS)
         {
@@ -490,7 +514,7 @@ void
     Status          status  = SUCCESS;
     Q_ARGS          *args   = (Q_ARGS *) arg;
     QUEUE_T         *q      = (QUEUE_T *) args->q;
-    QUEUE_NODE_T    *q_node = malloc(sizeof(*q_node));
+    QUEUE_NODE_T    *q_node;
     TxU32           r;
 
     srand(time(NULL));
@@ -514,11 +538,13 @@ void
             printf("Threaded queue test failed\n");
             goto cleanup;
         }
-
+        free(q_node);
         value++;
     }
 
     printf("Threaded queue test passed\n");
+    return NULL;
+
 cleanup:
     free(q_node);
 }
