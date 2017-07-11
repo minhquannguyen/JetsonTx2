@@ -13,17 +13,17 @@
 
 typedef struct
 {
-	TxU32 data;
+    TxU32 data;
 } CIRCULAR_BUF_DATA;
 
 typedef struct
 {
-	CIRCULAR_BUF_DATA 	*bufferData;
-	TxU32 				head;
-	TxU32 				tail;
-	TxU32 				count;
-	TxU32 				size;
-	pthread_mutex_t		bufLock;
+    CIRCULAR_BUF_DATA   *bufferData;
+    TxU32               head;
+    TxU32               tail;
+    TxU32               count;
+    TxU32               size;
+    pthread_mutex_t     bufLock;
 } CIRCULAR_BUF;
 
 Status buffer_init(CIRCULAR_BUF **cBuf, TxU32 bufSize);
@@ -37,19 +37,19 @@ Status buffer_free(CIRCULAR_BUF **cBuf);
 
 typedef struct node
 {
-	TxU32 data;
-	struct node *next;
+    TxU32       data;
+    struct node *next;
 } QUEUE_NODE_T;
 
 typedef struct queue
 {
-	QUEUE_NODE_T 	*head;
-	QUEUE_NODE_T 	*tail;
-	TxU32			count;
-	TxU32 			size;
-	pthread_mutex_t	qLock;
-	pthread_cond_t 	qDataReady;
-	pthread_cond_t 	qHasSpace;
+    QUEUE_NODE_T    *head;
+    QUEUE_NODE_T    *tail;
+    TxU32           nodeCount;
+    TxU32           qSize;
+    pthread_mutex_t qLock;
+    pthread_cond_t  qDataReady;
+    pthread_cond_t  qHasSpace;
 } QUEUE_T;
 
 Status queue_init(QUEUE_T **queue, TxU32 maxSize);

@@ -217,7 +217,7 @@ void
 
     srand(time(NULL));
 
-    for (TxU32 i = 0; i < 100; i++)
+    for (TxU32 i = 0; i < 1000; i++)
     {
         r = rand() % 1000;
         usleep(r);
@@ -232,7 +232,7 @@ void
 
         for (TxU32 i = 0; i < C_BUF_SIZE - 1; i++)
         {
-            // wait for buffer to be filled with valid data
+            // check if buffer is filled with valid data
             if (data[i+1].data == 0)
             {
                 break;
@@ -304,16 +304,24 @@ cleanup:
 /*******Multithreaded Queue*********/
 /***********************************/
 
+/*!
+ *  Function to initialize and allocate threaded queue
+ *
+ *  param[in/out]   queue   QUEUE_T double pointer
+ *  param[in]       qSize   Desired size of queue
+ *
+ *  returns SUCCESS
+ */
 Status
 queue_init
 (
     QUEUE_T **queue,
-    TxU32 maxSize
+    TxU32 qSize
 )
 {
     Status status = SUCCESS;
 
-    if (maxSize > MAX_QUEUE_SIZE)
+    if (qSize > MAX_QUEUE_SIZE)
     {
         printf("%s: Error requested queue size too large\n",
             __FUNCTION__);
@@ -353,11 +361,11 @@ queue_init
         goto cleanup;
     }
 
-    q->count = 0;
-    q->size  = maxSize;
-    q->head  = NULL;
-    q->tail  = NULL;
-    *queue   = q;
+    q->nodeCount    = 0;
+    q->qSize        = qSize;
+    q->head         = NULL;
+    q->tail         = NULL;
+    *queue          = q;
     return status;
 
 cleanup:
@@ -365,6 +373,14 @@ cleanup:
     return status;
 }
 
+/*!
+ *  Function to enqueue data into threaded queue
+ *
+ *  param[in/out]   queue   QUEUE_T double pointer
+ *  param[in]       data    Data to enqueue
+ *
+ *  returns SUCCESS
+ */
 Status
 queue_enqueue
 (
@@ -376,7 +392,7 @@ queue_enqueue
     QUEUE_T *q      = *queue;
 
     pthread_mutex_lock(&q->qLock);
-    while (q->count >= q->size)
+    while (q->nodeCount >= q->qSize)
     {
         pthread_cond_wait(&q->qHasSpace, &q->qLock);
     }
@@ -396,15 +412,14 @@ queue_enqueue
     if (q->head)
     {
         q->tail->next = qNode;
-        q->tail = qNode;
     }
     else
     {
         q->head = qNode;
-        q->tail = qNode;
     }
 
-    q->count++;
+    q->tail = qNode;
+    q->nodeCount++;
     pthread_cond_signal(&q->qDataReady);
     pthread_mutex_unlock(&q->qLock);
     return status;
@@ -414,6 +429,14 @@ cleanup:
     return status;
 }
 
+/*!
+ *  Function to dequeue data from threaded queue
+ *
+ *  param[in]       queue   QUEUE_T double pointer
+ *  param[in/out]   node    QUEUE_NODE_T node with dequeued data
+ *
+ *  returns SUCCESS
+ */
 Status
 queue_dequeue
 (
@@ -426,7 +449,7 @@ queue_dequeue
 
     pthread_mutex_lock(&q->qLock);
 
-    while (q->count <= 0)
+    while (q->nodeCount <= 0)
     {
         pthread_cond_wait(&q->qDataReady, &q->qLock);
     }
@@ -435,7 +458,7 @@ queue_dequeue
     {
         QUEUE_NODE_T *tmpNode = q->head;
         q->head = tmpNode->next;
-        q->count--;
+        q->nodeCount--;
         *node = tmpNode;
     }
     else
@@ -450,6 +473,13 @@ queue_dequeue
     return status;
 }
 
+/*!
+ *  Function to free allocated threaded queue
+ *
+ *  param[in]   queue  QUEUE_T double pointer
+ *
+ *  returns SUCCESS
+ */
 Status
 queue_free
 (
@@ -598,7 +628,7 @@ cleanup:
     return status;
 }
 
-// test
+// Test
 int main()
 {
     circular_buffer_test();
