@@ -11,12 +11,15 @@
  * Circular Buffer Struct and function definitions
  */
 
-typedef struct
+typedef struct CIRCULAR_BUF_DATA CIRCULAR_BUF_DATA;
+typedef struct CIRCULAR_BUF CIRCULAR_BUF;
+
+struct CIRCULAR_BUF_DATA
 {
     TxU32 data;
-} CIRCULAR_BUF_DATA;
+};
 
-typedef struct
+struct CIRCULAR_BUF
 {
     CIRCULAR_BUF_DATA   *bufferData;
     TxU32               head;
@@ -24,7 +27,7 @@ typedef struct
     TxU32               count;
     TxU32               size;
     pthread_mutex_t     bufLock;
-} CIRCULAR_BUF;
+};
 
 Status buffer_init(CIRCULAR_BUF **cBuf, TxU32 bufSize);
 Status buffer_push(CIRCULAR_BUF **cBuf, TxU32 data);
@@ -35,13 +38,16 @@ Status buffer_free(CIRCULAR_BUF **cBuf);
  * Multithreaded Queue Struct and function definitions
  */
 
-typedef struct node
-{
-    TxU32       data;
-    struct node *next;
-} QUEUE_NODE_T;
+typedef struct QUEUE_NODE_T QUEUE_NODE_T;
+typedef struct QUEUE_T QUEUE_T;
 
-typedef struct queue
+struct QUEUE_NODE_T
+{
+    TxU32           data;
+    QUEUE_NODE_T    *next;
+};
+
+struct QUEUE_T
 {
     QUEUE_NODE_T    *head;
     QUEUE_NODE_T    *tail;
@@ -50,7 +56,7 @@ typedef struct queue
     pthread_mutex_t qLock;
     pthread_cond_t  qDataReady;
     pthread_cond_t  qHasSpace;
-} QUEUE_T;
+};
 
 Status queue_init(QUEUE_T **queue, TxU32 maxSize);
 Status queue_enqueue(QUEUE_T **queue, TxU32 data);

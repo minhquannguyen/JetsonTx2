@@ -36,7 +36,7 @@ buffer_init
         printf("%s: Error initializing buffer\n",
             __FUNCTION__);
         status = INSUFFICIENT_RESOURCES;
-        goto cleanup;
+        goto cleanup1;
     }
 
     CIRCULAR_BUF_DATA *data = malloc(sizeof(*data) * bufSize);
@@ -45,7 +45,7 @@ buffer_init
         printf("%s: Error initializing buffer data\n",
             __FUNCTION__);
         status = INSUFFICIENT_RESOURCES;
-        goto cleanup;
+        goto cleanup2;
     }
 
     if (pthread_mutex_init(&buffer->bufLock, NULL) != 0)
@@ -53,7 +53,7 @@ buffer_init
         printf("%s: Error initializing buffer lock\n",
             __FUNCTION__);
         status = MUTEX_ERROR;
-        goto cleanup;
+        goto cleanup2;
     }
 
     buffer->bufferData  = data;
@@ -64,9 +64,10 @@ buffer_init
     *cBuf               = buffer;
     return status;
 
-cleanup:
-    free(buffer);
+cleanup2:
     free(data);
+cleanup1:
+    free(buffer);
     return status;
 }
 
@@ -275,7 +276,7 @@ circular_buffer_test()
     {
         printf("%s: Buffer init failed status: 0x%x\n",
             __FUNCTION__, status);
-        goto cleanup;
+        goto cleanup1;
     }
 
     args = malloc(sizeof(*args));
@@ -284,7 +285,7 @@ circular_buffer_test()
         printf("%s: Error initializing args status\n",
             __FUNCTION__);
         status = INSUFFICIENT_RESOURCES;
-        goto cleanup;
+        goto cleanup2;
     }
     args->cBuf = cBuf;
 
@@ -294,8 +295,9 @@ circular_buffer_test()
     pthread_join(tid[0], NULL);
     pthread_join(tid[1], NULL);
 
-cleanup:
+cleanup2:
     free(args);
+cleanup1:
     buffer_free(&cBuf);
     return status;
 }
@@ -603,7 +605,7 @@ threaded_queue_test()
     {
         printf("%s: Buffer init failed status: 0x%x\n",
             __FUNCTION__, status);
-        goto cleanup;
+        goto cleanup1;
     }
 
     args = malloc(sizeof(*args));
@@ -612,7 +614,7 @@ threaded_queue_test()
         printf("%s: Error initializing args status\n",
             __FUNCTION__);
         status = INSUFFICIENT_RESOURCES;
-        goto cleanup;
+        goto cleanup2;
     }
     args->q = q;
 
@@ -622,8 +624,9 @@ threaded_queue_test()
     pthread_join(tid[0], NULL);
     pthread_join(tid[1], NULL);
 
-cleanup:
+cleanup2:
     free(args);
+cleanup1:
     queue_free(&q);
     return status;
 }
